@@ -1,0 +1,24 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'tailwindcss';
+
+@theme {
+  /* Define your Polystore palette here */
+  --color-poly-50: #f0f7fc;
+  --color-poly-100: #e0eff9;
+  --color-poly-200: #bae0f1;
+  --color-poly-300: #7ac0e6;
+  --color-poly-400: #38a0d8;
+  --color-poly-500: #2086c0;
+  --color-poly-600: #156a9e;
+  --color-poly-700: #14547f;
+  --color-poly-800: #12476b;
+  --color-poly-900: #133b58;
+  --color-poly-950: #0c263c;
+
+  /* Surface colors */
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #0f172a;
+  --color-surface2-light: #f8fafc;
+  --color-surface2-dark: #1e293b;
+}
