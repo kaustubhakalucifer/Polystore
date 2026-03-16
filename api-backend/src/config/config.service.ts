@@ -77,7 +77,7 @@ export class ConfigService implements OnModuleInit {
    * Get application port
    */
   get port(): number {
-    return this.validatedConfig.PORT || DEFAULT_ENV_VALUES.PORT;
+    return this.validatedConfig.PORT ?? DEFAULT_ENV_VALUES.PORT;
   }
 
   /**

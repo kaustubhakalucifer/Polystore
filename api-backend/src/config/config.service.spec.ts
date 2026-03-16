@@ -96,7 +96,7 @@ describe('ConfigService - Environment Validation', () => {
     expect(mockNestConfigService.get('MONGODB_URI')).toBe(TEST_MONGODB_URI);
   });
 
-  it('should handle missing optional PORT with default', () => {
+  it('should handle missing optional PORT with default', async () => {
     const mockNestConfigService = {
       get: (key: string) => {
         if (key === 'PORT') return undefined;
@@ -106,9 +106,17 @@ describe('ConfigService - Environment Validation', () => {
       },
     };
 
-    // When PORT is missing, it should use default value of 3000
-    const port = mockNestConfigService.get('PORT') ?? 3000;
-    expect(port).toBe(3000);
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ConfigService,
+        {
+          provide: NestConfigService,
+          useValue: mockNestConfigService,
+        },
+      ],
+    }).compile();
+    const configService = module.get<ConfigService>(ConfigService);
+    expect(configService.port).toBe(3000);
   });
 
   it('should handle missing optional NODE_ENV with default', () => {
@@ -124,20 +132,5 @@ describe('ConfigService - Environment Validation', () => {
     // When NODE_ENV is missing, it should use default value of 'development'
     const nodeEnv = mockNestConfigService.get('NODE_ENV') ?? 'development';
     expect(nodeEnv).toBe('development');
-  });
-});
-
-describe('ConfigService - MongoDB URI Formats', () => {
-  it('should support standard MongoDB Atlas connection string', () => {
-    const validAtlasUri =
-      'mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority';
-    expect(validAtlasUri).toContain('mongodb+srv://');
-    expect(validAtlasUri).toContain('cluster.mongodb.net');
-  });
-
-  it('should support local MongoDB connection string', () => {
-    const localUri = 'mongodb://localhost:27017/polystore';
-    expect(localUri).toContain('mongodb://');
-    expect(localUri).toContain('localhost:27017');
   });
 });

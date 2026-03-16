@@ -1,9 +1,11 @@
 import {
   IsString,
   IsNotEmpty,
-  IsNumber,
+  IsInt,
   IsEnum,
   IsOptional,
+  Min,
+  Max,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -17,9 +19,16 @@ export class EnvironmentDto {
   @Transform(({ value }: { value: string }) => value?.trim())
   MONGODB_URI!: string;
 
-  @IsNumber()
+  @IsInt()
   @IsOptional()
-  @Transform(({ value }: { value: string }) => parseInt(value, 10))
+  @Min(0)
+  @Max(65535)
+  @Transform(({ value }: { value?: string | number }) => {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value === 'number') return value;
+    const normalized = value.trim();
+    return normalized === '' ? Number.NaN : Number(normalized);
+  })
   PORT?: number;
 
   @IsEnum(['development', 'production', 'test'])
