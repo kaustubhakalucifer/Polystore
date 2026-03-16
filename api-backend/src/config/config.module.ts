@@ -5,12 +5,21 @@ import { ConfigService } from './config.service';
 /**
  * Configuration module for the application
  * Provides validated environment variables throughout the app
+ *
+ * Environment file priority:
+ * - .env.test (used when NODE_ENV=test)
+ * - .env.production
+ * - .env.development
+ * - .env
  */
 @Global()
 @Module({
   imports: [
     NestConfigModule.forRoot({
-      envFilePath: ['.env.production', '.env.development', '.env'],
+      envFilePath:
+        process.env.NODE_ENV === 'test'
+          ? ['.env.test', '.env.production', '.env.development', '.env']
+          : ['.env.production', '.env.development', '.env'],
       ignoreEnvFile: false,
     }),
   ],
