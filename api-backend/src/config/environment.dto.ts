@@ -19,6 +19,11 @@ export class EnvironmentDto {
   @Transform(({ value }: { value: string }) => value?.trim())
   MONGODB_URI!: string;
 
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }: { value?: string }) => value?.trim())
+  MONGODB_DB_NAME?: string;
+
   @IsInt()
   @IsOptional()
   @Min(0)

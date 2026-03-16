@@ -2,10 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
+const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
-
   const app = await NestFactory.create(AppModule);
 
   // Get config service to trigger validation
@@ -27,4 +26,7 @@ async function bootstrap() {
   logger.log(`Environment: ${configService.nodeEnv}`);
 }
 
-void bootstrap();
+bootstrap().catch((err) => {
+  logger.error('Application failed to start', err);
+  process.exit(1);
+});

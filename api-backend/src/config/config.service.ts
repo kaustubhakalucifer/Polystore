@@ -32,6 +32,7 @@ export class ConfigService implements OnModuleInit {
   private validateAndTransform(): EnvironmentDto {
     const envConfig = {
       MONGODB_URI: this.nestConfigService.get<string>('MONGODB_URI'),
+      MONGODB_DB_NAME: this.nestConfigService.get<string>('MONGODB_DB_NAME'),
       PORT:
         this.nestConfigService.get<string | number>('PORT') ??
         DEFAULT_ENV_VALUES.PORT,
@@ -71,6 +72,14 @@ export class ConfigService implements OnModuleInit {
    */
   get mongoUri(): string {
     return this.validatedConfig.MONGODB_URI;
+  }
+
+  /**
+   * Get MongoDB database name
+   * If not provided, it will be extracted from the URI or use the default
+   */
+  get mongoDbName(): string | undefined {
+    return this.validatedConfig.MONGODB_DB_NAME;
   }
 
   /**

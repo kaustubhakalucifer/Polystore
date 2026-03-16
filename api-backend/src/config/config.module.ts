@@ -12,7 +12,6 @@ import { ConfigService } from './config.service';
     NestConfigModule.forRoot({
       envFilePath: ['.env.production', '.env.development', '.env'],
       ignoreEnvFile: false,
-      isGlobal: true,
     }),
   ],
   providers: [ConfigService],
