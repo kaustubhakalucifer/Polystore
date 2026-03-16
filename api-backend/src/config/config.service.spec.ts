@@ -23,6 +23,7 @@ describe('ConfigService', () => {
     delete process.env.NODE_ENV;
     delete process.env.MONGODB_URI;
     delete process.env.PORT;
+    delete process.env.MONGODB_DB_NAME;
   });
 
   describe('Initialization', () => {
@@ -70,48 +71,39 @@ describe('ConfigService', () => {
   });
 });
 
-describe('ConfigService - Environment Validation', () => {
-  it('should load test environment variables when NODE_ENV=test', () => {
-    process.env.NODE_ENV = 'test';
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/polystore_test';
-    process.env.PORT = '3000';
+describe('ConfigService - Default Values', () => {
+  let configService: ConfigService;
 
-    expect(process.env.NODE_ENV).toBe('test');
-    expect(process.env.MONGODB_URI).toBe(
-      'mongodb://localhost:27017/polystore_test',
-    );
-  });
-
-  it('should use default PORT when not provided', () => {
-    process.env.NODE_ENV = 'test';
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
-    delete process.env.PORT;
-
-    const port = process.env.PORT ?? 3000;
-    expect(port).toBe(3000);
-  });
-
-  it('should use default NODE_ENV when not provided', () => {
+  afterEach(() => {
     delete process.env.NODE_ENV;
     delete process.env.MONGODB_URI;
     delete process.env.PORT;
-
-    const nodeEnv = process.env.NODE_ENV ?? 'development';
-    expect(nodeEnv).toBe('development');
-  });
-});
-
-describe('ConfigService - MongoDB URI Formats', () => {
-  it('should support local MongoDB connection string', () => {
-    const localUri = 'mongodb://localhost:27017/polystore';
-    expect(localUri).toContain('mongodb://');
-    expect(localUri).toContain('localhost:27017');
+    delete process.env.MONGODB_DB_NAME;
   });
 
-  it('should support MongoDB Atlas SRV connection string', () => {
-    const atlasUri =
-      'mongodb+srv://username:password@cluster.mongodb.net/database';
-    expect(atlasUri).toContain('mongodb+srv://');
-    expect(atlasUri).toContain('cluster.mongodb.net');
+  it('should use default PORT when not provided', async () => {
+    process.env.NODE_ENV = 'development';
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
+    delete process.env.PORT;
+
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [ConfigModule],
+    }).compile();
+
+    configService = module.get<ConfigService>(ConfigService);
+    expect(configService.port).toBe(3000);
+  });
+
+  it('should use default NODE_ENV when not provided', async () => {
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
+    delete process.env.NODE_ENV;
+    delete process.env.PORT;
+
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [ConfigModule],
+    }).compile();
+
+    configService = module.get<ConfigService>(ConfigService);
+    expect(configService.nodeEnv).toBe('development');
   });
 });
