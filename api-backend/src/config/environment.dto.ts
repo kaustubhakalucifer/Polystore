@@ -4,6 +4,8 @@ import {
   IsInt,
   IsEnum,
   IsOptional,
+  IsHexadecimal,
+  Length,
   Min,
   Max,
 } from 'class-validator';
@@ -18,6 +20,21 @@ export class EnvironmentDto {
   @IsNotEmpty({ message: 'MONGODB_URI is required' })
   @Transform(({ value }: { value: string }) => value?.trim())
   MONGODB_URI!: string;
+
+  /**
+   * 64-character hex string representing 32 raw bytes (256-bit key).
+   * Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   */
+  @IsString()
+  @IsNotEmpty({ message: 'ENCRYPTION_KEY is required' })
+  @IsHexadecimal({
+    message: 'ENCRYPTION_KEY must be a valid hexadecimal string',
+  })
+  @Length(64, 64, {
+    message: 'ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)',
+  })
+  @Transform(({ value }: { value: string }) => value?.trim())
+  ENCRYPTION_KEY!: string;
 
   @IsString()
   @IsOptional()
