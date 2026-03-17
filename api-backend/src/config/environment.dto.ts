@@ -8,6 +8,7 @@ import {
   Length,
   Min,
   Max,
+  IsEmail,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -56,6 +57,23 @@ export class EnvironmentDto {
   @IsEnum(['development', 'production', 'test'])
   @IsOptional()
   NODE_ENV?: 'development' | 'production' | 'test';
+
+  /**
+   * Super Admin email for initial database seeding
+   */
+  @IsString()
+  @IsEmail()
+  @IsOptional()
+  @Transform(({ value }: { value?: string }) => value?.trim())
+  SUPER_ADMIN_EMAIL?: string;
+
+  /**
+   * Super Admin password for initial database seeding
+   */
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }: { value?: string }) => value?.trim())
+  SUPER_ADMIN_PASSWORD?: string;
 }
 
 /**

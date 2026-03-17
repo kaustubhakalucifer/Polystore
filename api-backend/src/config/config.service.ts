@@ -40,6 +40,11 @@ export class ConfigService implements OnModuleInit {
       NODE_ENV:
         this.nestConfigService.get<string>('NODE_ENV') ??
         DEFAULT_ENV_VALUES.NODE_ENV,
+      SUPER_ADMIN_EMAIL:
+        this.nestConfigService.get<string>('SUPER_ADMIN_EMAIL'),
+      SUPER_ADMIN_PASSWORD: this.nestConfigService.get<string>(
+        'SUPER_ADMIN_PASSWORD',
+      ),
     };
 
     const instance = plainToInstance(EnvironmentDto, envConfig);
