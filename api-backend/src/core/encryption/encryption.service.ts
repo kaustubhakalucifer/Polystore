@@ -105,11 +105,10 @@ export class EncryptionService {
 
       return decrypted.toString('utf8');
     } catch (error: unknown) {
-      // GCM authentication failures surface as a generic Error from Node crypto
+      // GCM authentication failures surface as a plain Error from Node crypto
       if (
-        error instanceof BadRequestException ||
-        (error instanceof Error &&
-          error.message.includes('Unsupported state or unable to authenticate'))
+        error instanceof Error &&
+        error.message.includes('Unsupported state or unable to authenticate')
       ) {
         throw new BadRequestException(
           'Decryption failed: authentication tag mismatch. The data may be corrupted or tampered with.',
