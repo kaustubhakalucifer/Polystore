@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -12,7 +7,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { PlatformRole, UserStatus } from 'src/core/enums';
 
 @Injectable()
-export class UsersSeederService implements OnModuleInit, OnModuleDestroy {
+export class UsersSeederService implements OnModuleInit {
   private readonly logger = new Logger(UsersSeederService.name);
   private readonly bcryptSaltRounds = 10;
 
@@ -23,10 +18,6 @@ export class UsersSeederService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     await this.seedSuperAdmin();
-  }
-
-  async onModuleDestroy(): Promise<void> {
-    // Cleanup if needed
   }
 
   /**
