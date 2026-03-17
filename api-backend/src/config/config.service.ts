@@ -33,6 +33,7 @@ export class ConfigService implements OnModuleInit {
     const envConfig = {
       MONGODB_URI: this.nestConfigService.get<string>('MONGODB_URI'),
       MONGODB_DB_NAME: this.nestConfigService.get<string>('MONGODB_DB_NAME'),
+      ENCRYPTION_KEY: this.nestConfigService.get<string>('ENCRYPTION_KEY'),
       PORT:
         this.nestConfigService.get<string | number>('PORT') ??
         DEFAULT_ENV_VALUES.PORT,
@@ -94,6 +95,13 @@ export class ConfigService implements OnModuleInit {
    */
   get nodeEnv(): string {
     return this.validatedConfig.NODE_ENV || DEFAULT_ENV_VALUES.NODE_ENV;
+  }
+
+  /**
+   * Get the AES-256-GCM encryption key (64-char hex / 32 bytes)
+   */
+  get encryptionKey(): string {
+    return this.validatedConfig.ENCRYPTION_KEY;
   }
 
   /**
