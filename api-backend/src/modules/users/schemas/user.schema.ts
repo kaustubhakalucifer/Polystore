@@ -14,7 +14,7 @@ export class User {
   })
   email: string;
 
-  @Prop()
+  @Prop({ select: false })
   passwordHash?: string;
 
   @Prop()
