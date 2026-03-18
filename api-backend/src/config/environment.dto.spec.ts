@@ -12,6 +12,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'development',
       };
@@ -27,6 +32,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: '',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'development',
       };
@@ -43,6 +53,11 @@ describe('EnvironmentDto', () => {
       const invalidConfig = {
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'development',
       };
@@ -58,6 +73,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         NODE_ENV: 'development',
       };
 
@@ -72,6 +92,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
       };
 
@@ -86,6 +111,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'invalid',
       };
@@ -104,6 +134,11 @@ describe('EnvironmentDto', () => {
           MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
           ENCRYPTION_KEY: VALID_KEY,
           JWT_SECRET: 'test-secret',
+          SMTP_HOST: 'smtp.example.com',
+          SMTP_PORT: '587',
+          SMTP_USER: 'user',
+          SMTP_PASS: 'pass',
+          SMTP_FROM: 'noreply@example.com',
           PORT: '3000',
           NODE_ENV: envValue,
         };
@@ -120,6 +155,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
         PORT: 3000,
         NODE_ENV: 'development',
       };
@@ -138,6 +178,11 @@ describe('EnvironmentDto', () => {
           'mongodb+srv://username:password@cluster-name.mongodb.net/database?retryWrites=true&w=majority',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
       };
 
       const dto = plainToInstance(EnvironmentDto, atlasConfig);
@@ -151,6 +196,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb://localhost:27017/polystore',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
       };
 
       const dto = plainToInstance(EnvironmentDto, standardConfig);
@@ -165,6 +215,11 @@ describe('EnvironmentDto', () => {
           'mongodb://user:password@localhost:27017/admin?authSource=admin',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
       };
 
       const dto = plainToInstance(EnvironmentDto, authConfig);
@@ -180,6 +235,11 @@ describe('EnvironmentDto', () => {
         MONGODB_URI: 'mongodb://localhost:27017/test',
         ENCRYPTION_KEY: VALID_KEY,
         JWT_SECRET: 'test-secret',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'noreply@example.com',
       });
       expect(validateSync(dto).length).toBe(0);
     });

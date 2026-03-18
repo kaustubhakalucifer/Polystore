@@ -53,8 +53,8 @@ export class AuthService {
       otpExpiresAt,
     });
 
-    await newUser.save();
     await this.emailService.sendOtp(registerDto.email, otpCode);
+    await newUser.save();
   }
 
   async verifyOtp(verifyDto: VerifyOtpDto): Promise<void> {
@@ -94,7 +94,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
-    const user = await this.usersService.findByEmail(
+    const user = await this.usersService.findByEmailWithPassword(
       loginDto.email.toLowerCase(),
     );
 

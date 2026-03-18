@@ -3,7 +3,7 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { EnvironmentDto, DEFAULT_ENV_VALUES } from './environment.dto';
-import { StringValue } from 'ms';
+import type { StringValue } from 'ms';
 
 /**
  * Custom ConfigService that validates environment variables
@@ -48,6 +48,11 @@ export class ConfigService implements OnModuleInit {
       ),
       JWT_SECRET: this.nestConfigService.get<string>('JWT_SECRET'),
       JWT_EXPIRATION: this.nestConfigService.get<string>('JWT_EXPIRATION'),
+      SMTP_HOST: this.nestConfigService.get<string>('SMTP_HOST'),
+      SMTP_PORT: this.nestConfigService.get<string | number>('SMTP_PORT'),
+      SMTP_USER: this.nestConfigService.get<string>('SMTP_USER'),
+      SMTP_PASS: this.nestConfigService.get<string>('SMTP_PASS'),
+      SMTP_FROM: this.nestConfigService.get<string>('SMTP_FROM'),
     };
 
     const instance = plainToInstance(EnvironmentDto, envConfig);
@@ -144,6 +149,26 @@ export class ConfigService implements OnModuleInit {
    * Get JWT expiration time
    */
   get jwtExpiration(): StringValue {
-    return this.validatedConfig.JWT_EXPIRATION;
+    return this.validatedConfig.JWT_EXPIRATION!;
+  }
+
+  get smtpHost(): string {
+    return this.validatedConfig.SMTP_HOST;
+  }
+
+  get smtpPort(): number {
+    return this.validatedConfig.SMTP_PORT;
+  }
+
+  get smtpUser(): string {
+    return this.validatedConfig.SMTP_USER;
+  }
+
+  get smtpPass(): string {
+    return this.validatedConfig.SMTP_PASS;
+  }
+
+  get smtpFrom(): string {
+    return this.validatedConfig.SMTP_FROM;
   }
 }

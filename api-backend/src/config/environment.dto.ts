@@ -84,7 +84,35 @@ export class EnvironmentDto {
   @IsString()
   @IsOptional()
   @Transform(({ value }: { value?: StringValue }) => value?.trim())
-  JWT_EXPIRATION!: StringValue;
+  JWT_EXPIRATION?: StringValue;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_HOST!: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(65535)
+  @Transform(({ value }: { value?: string | number }) => {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value === 'number') return value;
+    const normalized = value.trim();
+    return normalized === '' ? Number.NaN : Number(normalized);
+  })
+  SMTP_PORT!: number;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_USER!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_PASS!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_FROM!: string;
 }
 
 /**

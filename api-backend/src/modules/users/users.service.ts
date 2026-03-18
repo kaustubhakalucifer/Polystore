@@ -9,4 +9,8 @@ export class UsersService {
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.usersRepository.findByEmail(email);
   }
+
+  async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
+    return this.usersRepository.findByEmailWithPassword(email);
+  }
 }

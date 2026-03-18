@@ -14,7 +14,10 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let usersService: { findByEmail: jest.Mock };
+  let usersService: {
+    findByEmail: jest.Mock;
+    findByEmailWithPassword: jest.Mock;
+  };
   let jwtService: { signAsync: jest.Mock };
   let emailService: { sendOtp: jest.Mock };
   let userModel: { findOne: jest.Mock; create: jest.Mock };
@@ -22,6 +25,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const mockUsersService = {
       findByEmail: jest.fn(),
+      findByEmailWithPassword: jest.fn(),
     };
 
     const mockJwtService = {
@@ -196,7 +200,7 @@ describe('AuthService', () => {
         status: UserStatus.ACTIVE,
       };
 
-      usersService.findByEmail.mockResolvedValue(
+      usersService.findByEmailWithPassword.mockResolvedValue(
         mockUser as unknown as UserDocument,
       );
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -204,9 +208,9 @@ describe('AuthService', () => {
 
       const result = await authService.login(loginDto);
 
-      expect(jest.mocked(usersService.findByEmail)).toHaveBeenCalledWith(
-        loginDto.email,
-      );
+      expect(
+        jest.mocked(usersService.findByEmailWithPassword),
+      ).toHaveBeenCalledWith(loginDto.email);
       expect(bcrypt.compare).toHaveBeenCalledWith(
         loginDto.password,
         mockUser.passwordHash,
@@ -220,7 +224,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if user is not found', async () => {
-      usersService.findByEmail.mockResolvedValue(null);
+      usersService.findByEmailWithPassword.mockResolvedValue(null);
 
       await expect(authService.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
@@ -234,7 +238,7 @@ describe('AuthService', () => {
         passwordHash: 'hashedPassword',
       };
 
-      usersService.findByEmail.mockResolvedValue(
+      usersService.findByEmailWithPassword.mockResolvedValue(
         mockUser as unknown as UserDocument,
       );
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
