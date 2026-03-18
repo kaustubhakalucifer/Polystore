@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import { UserStatus } from 'src/core/enums';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
     const user = await this.usersService.findByEmail(loginDto.email);
 
-    if (!user || !user.passwordHash) {
+    if (!user || !user.passwordHash || user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('Invalid credentials');
     }
 

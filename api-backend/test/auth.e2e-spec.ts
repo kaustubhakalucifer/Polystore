@@ -26,7 +26,7 @@ describe('AuthController (e2e)', () => {
 
     userModel = moduleFixture.get<Model<User>>(getModelToken(User.name));
 
-    await userModel.deleteMany({});
+    await userModel.deleteMany({ email: userEmail });
 
     const passwordHash = await bcrypt.hash(userPassword, 10);
     await userModel.create({
@@ -40,7 +40,7 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await userModel.deleteMany({});
+    await userModel.deleteMany({ email: userEmail });
     await app.close();
   });
 
