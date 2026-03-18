@@ -7,20 +7,21 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EmailModule } from '../../core/email/email.module';
+import { EncryptionModule } from '../../core/encryption/encryption.module';
 import { User, UserSchema } from '../users/schemas/user.schema';
 
 @Module({
   imports: [
     UsersModule,
     EmailModule,
+    EncryptionModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.jwtSecret,
         signOptions: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          expiresIn: configService.jwtExpiration as any,
+          expiresIn: configService.jwtExpiration,
         },
       }),
       inject: [ConfigService],

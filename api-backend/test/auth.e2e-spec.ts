@@ -8,6 +8,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../src/modules/users/schemas/user.schema';
 import { PlatformRole, UserStatus } from '../src/core/enums';
+import { EncryptionService } from '../src/core/encryption/encryption.service';
 
 type MockUser = Partial<User> & {
   email: string;
@@ -44,7 +45,7 @@ describe('AuthController (e2e)', () => {
             exec: mockExec,
             then: (resolve: (val: MockUser | null) => void) => resolve(user),
           } as unknown as {
-            select: jest.Mock<any, []>;
+            select: jest.Mock<Promise<MockUser | null>, []>;
             exec: jest.Mock<Promise<MockUser | null>, []>;
           };
 
@@ -142,8 +143,12 @@ describe('AuthController (e2e)', () => {
       expect(user?.status).toBe(UserStatus.UNVERIFIED);
       expect(user?.otpCode).toBeDefined();
 
+      // We need to capture the unencrypted OTP from EmailService.
+      // Since it's an e2e test, we would normally get it from the mock email service.
+      // For this test without modifying EmailService mock, we decrypt the DB value.
+      const encryptionService = app.get(EncryptionService);
       if (!user?.otpCode) throw new Error('OTP not generated');
-      otpCode = user.otpCode;
+      otpCode = encryptionService.decrypt(user.otpCode);
     });
 
     it('/auth/register (POST) - should return 400 if user already exists', async () => {
@@ -195,8 +200,8 @@ describe('AuthController (e2e)', () => {
       .expect(200);
 
     expect(response.body).toHaveProperty('accessToken');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(typeof response.body.accessToken).toBe('string');
+    const body = response.body as { accessToken: string };
+    expect(typeof body.accessToken).toBe('string');
   });
 
   it('/auth/login (POST) - should return 401 with invalid password', async () => {

@@ -2,22 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 
 jest.mock('bcryptjs');
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../../core/email/email.service';
+import { EncryptionService } from '../../core/encryption/encryption.service';
 import { PlatformRole, UserStatus } from '../../core/enums';
 import { User, UserDocument } from '../users/schemas/user.schema';
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let usersService: jest.Mocked<UsersService>;
-  let jwtService: jest.Mocked<JwtService>;
-  let emailService: jest.Mocked<EmailService>;
-  let userModel: Model<UserDocument>;
+  let usersService: { findByEmail: jest.Mock };
+  let jwtService: { signAsync: jest.Mock };
+  let emailService: { sendOtp: jest.Mock };
+  let userModel: { findOne: jest.Mock; create: jest.Mock };
 
   beforeEach(async () => {
     const mockUsersService = {
@@ -32,15 +32,28 @@ describe('AuthService', () => {
       sendOtp: jest.fn(),
     };
 
+    const mockEncryptionService = {
+      encrypt: jest
+        .fn()
+        .mockImplementation((val: string) => `encrypted_${val}`),
+      decrypt: jest
+        .fn()
+        .mockImplementation((val: string) => val.replace('encrypted_', '')),
+    };
+
     const mockUserModel = {
       findOne: jest.fn(),
     };
 
     // To properly mock `new this.userModel()`
 
-    const MockUserModelConstructor = function (this: any, data: any) {
+    type MockUser = Partial<User> & { save: jest.Mock };
+
+    const MockUserModelConstructor = function (
+      this: MockUser,
+      data: Partial<User>,
+    ) {
       Object.assign(this, data);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       this.save = jest.fn().mockResolvedValue(this);
     };
     MockUserModelConstructor.findOne = mockUserModel.findOne;
@@ -51,6 +64,7 @@ describe('AuthService', () => {
         { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: EmailService, useValue: mockEmailService },
+        { provide: EncryptionService, useValue: mockEncryptionService },
         {
           provide: getModelToken(User.name),
           useValue: MockUserModelConstructor,
@@ -74,30 +88,27 @@ describe('AuthService', () => {
     };
 
     it('should throw BadRequestException if user already exists', async () => {
-      (userModel.findOne as jest.Mock).mockResolvedValue({ _id: 'existingId' });
+      userModel.findOne.mockResolvedValue({ _id: 'existingId' });
 
       await expect(authService.register(registerDto)).rejects.toThrow(
         BadRequestException,
       );
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(userModel.findOne as jest.Mock).toHaveBeenCalledWith({
+      expect(jest.mocked(userModel.findOne)).toHaveBeenCalledWith({
         email: registerDto.email,
       });
     });
 
     it('should successfully register a user and send OTP', async () => {
-      (userModel.findOne as jest.Mock).mockResolvedValue(null);
+      userModel.findOne.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
 
       await authService.register(registerDto);
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(userModel.findOne as jest.Mock).toHaveBeenCalledWith({
+      expect(jest.mocked(userModel.findOne)).toHaveBeenCalledWith({
         email: registerDto.email,
       });
       expect(bcrypt.hash).toHaveBeenCalledWith(registerDto.password, 10);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(emailService.sendOtp).toHaveBeenCalledWith(
+      expect(jest.mocked(emailService.sendOtp)).toHaveBeenCalledWith(
         registerDto.email,
         expect.any(String),
       );
@@ -109,7 +120,7 @@ describe('AuthService', () => {
 
     it('should throw BadRequestException if user not found', async () => {
       const mockFindOne = { select: jest.fn().mockResolvedValue(null) };
-      (userModel.findOne as jest.Mock).mockReturnValue(mockFindOne);
+      userModel.findOne.mockReturnValue(mockFindOne);
 
       await expect(authService.verifyOtp(verifyDto)).rejects.toThrow(
         BadRequestException,
@@ -120,7 +131,7 @@ describe('AuthService', () => {
       const mockFindOne = {
         select: jest.fn().mockResolvedValue({ status: UserStatus.PENDING }),
       };
-      (userModel.findOne as jest.Mock).mockReturnValue(mockFindOne);
+      userModel.findOne.mockReturnValue(mockFindOne);
 
       await expect(authService.verifyOtp(verifyDto)).rejects.toThrow(
         BadRequestException,
@@ -130,10 +141,10 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if OTP does not match', async () => {
       const mockUser = {
         status: UserStatus.UNVERIFIED,
-        otpCode: '654321',
+        otpCode: 'encrypted_654321',
       };
       const mockFindOne = { select: jest.fn().mockResolvedValue(mockUser) };
-      (userModel.findOne as jest.Mock).mockReturnValue(mockFindOne);
+      userModel.findOne.mockReturnValue(mockFindOne);
 
       await expect(authService.verifyOtp(verifyDto)).rejects.toThrow(
         UnauthorizedException,
@@ -143,11 +154,11 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if OTP has expired', async () => {
       const mockUser = {
         status: UserStatus.UNVERIFIED,
-        otpCode: '123456',
+        otpCode: 'encrypted_123456',
         otpExpiresAt: new Date(Date.now() - 1000), // Expired
       };
       const mockFindOne = { select: jest.fn().mockResolvedValue(mockUser) };
-      (userModel.findOne as jest.Mock).mockReturnValue(mockFindOne);
+      userModel.findOne.mockReturnValue(mockFindOne);
 
       await expect(authService.verifyOtp(verifyDto)).rejects.toThrow(
         UnauthorizedException,
@@ -157,12 +168,12 @@ describe('AuthService', () => {
     it('should update user status to PENDING on successful verification', async () => {
       const mockUser = {
         status: UserStatus.UNVERIFIED,
-        otpCode: '123456',
+        otpCode: 'encrypted_123456',
         otpExpiresAt: new Date(Date.now() + 10000), // Valid
         save: jest.fn().mockResolvedValue(true),
       };
       const mockFindOne = { select: jest.fn().mockResolvedValue(mockUser) };
-      (userModel.findOne as jest.Mock).mockReturnValue(mockFindOne);
+      userModel.findOne.mockReturnValue(mockFindOne);
 
       await authService.verifyOtp(verifyDto);
 
@@ -193,14 +204,14 @@ describe('AuthService', () => {
 
       const result = await authService.login(loginDto);
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(usersService.findByEmail).toHaveBeenCalledWith(loginDto.email);
+      expect(jest.mocked(usersService.findByEmail)).toHaveBeenCalledWith(
+        loginDto.email,
+      );
       expect(bcrypt.compare).toHaveBeenCalledWith(
         loginDto.password,
         mockUser.passwordHash,
       );
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(jwtService.signAsync).toHaveBeenCalledWith({
+      expect(jest.mocked(jwtService.signAsync)).toHaveBeenCalledWith({
         sub: mockUser._id,
         email: mockUser.email,
         role: mockUser.platformRole,

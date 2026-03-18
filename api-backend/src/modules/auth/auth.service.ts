@@ -14,6 +14,7 @@ import { PlatformRole, UserStatus } from '../../core/enums';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { EncryptionService } from '../../core/encryption/encryption.service';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
+    private readonly encryptionService: EncryptionService,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
@@ -37,6 +39,9 @@ export class AuthService {
     const otpCode = crypto.randomInt(100000, 999999).toString();
     const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
+    // Encrypt the OTP code before storing
+    const encryptedOtpCode = this.encryptionService.encrypt(otpCode);
+
     const newUser = new this.userModel({
       email: registerDto.email.toLowerCase(),
       passwordHash,
@@ -44,7 +49,7 @@ export class AuthService {
       lastName: registerDto.lastName,
       platformRole: PlatformRole.TENANT_ADMIN,
       status: UserStatus.UNVERIFIED,
-      otpCode,
+      otpCode: encryptedOtpCode,
       otpExpiresAt,
     });
 
@@ -66,7 +71,14 @@ export class AuthService {
       );
     }
 
-    if (user.otpCode !== verifyDto.otpCode) {
+    let decryptedOtpCode: string;
+    try {
+      decryptedOtpCode = this.encryptionService.decrypt(user.otpCode!);
+    } catch {
+      throw new UnauthorizedException('Invalid OTP');
+    }
+
+    if (decryptedOtpCode !== verifyDto.otpCode) {
       throw new UnauthorizedException('Invalid OTP');
     }
 
@@ -82,7 +94,9 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByEmail(
+      loginDto.email.toLowerCase(),
+    );
 
     if (!user || !user.passwordHash || user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('Invalid credentials');
