@@ -10,6 +10,9 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).select('+passwordHash').exec();
+    return this.userModel
+      .findOne({ email: { $eq: String(email) } })
+      .select('+passwordHash')
+      .exec();
   }
 }
