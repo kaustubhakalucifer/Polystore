@@ -11,6 +11,7 @@ import {
   IsEmail,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { type StringValue } from 'ms';
 
 /**
  * Environment variables validation DTO
@@ -74,12 +75,23 @@ export class EnvironmentDto {
   @IsOptional()
   @Transform(({ value }: { value?: string }) => value?.trim())
   SUPER_ADMIN_PASSWORD?: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'JWT_SECRET is required' })
+  @Transform(({ value }: { value?: string }) => value?.trim())
+  JWT_SECRET!: string;
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }: { value?: StringValue }) => value?.trim())
+  JWT_EXPIRATION!: StringValue;
 }
 
 /**
  * Default values for environment variables
  */
 export const DEFAULT_ENV_VALUES = {
+  JWT_EXPIRATION: '1d' as StringValue,
   PORT: 3000,
   NODE_ENV: 'development',
 };

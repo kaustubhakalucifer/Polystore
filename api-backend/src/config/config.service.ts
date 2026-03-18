@@ -3,6 +3,7 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { EnvironmentDto, DEFAULT_ENV_VALUES } from './environment.dto';
+import { StringValue } from 'ms';
 
 /**
  * Custom ConfigService that validates environment variables
@@ -45,6 +46,8 @@ export class ConfigService implements OnModuleInit {
       SUPER_ADMIN_PASSWORD: this.nestConfigService.get<string>(
         'SUPER_ADMIN_PASSWORD',
       ),
+      JWT_SECRET: this.nestConfigService.get<string>('JWT_SECRET'),
+      JWT_EXPIRATION: this.nestConfigService.get<string>('JWT_EXPIRATION'),
     };
 
     const instance = plainToInstance(EnvironmentDto, envConfig);
@@ -128,5 +131,19 @@ export class ConfigService implements OnModuleInit {
    */
   get isTest(): boolean {
     return this.nodeEnv === 'test';
+  }
+
+  /**
+   * Get JWT secret
+   */
+  get jwtSecret(): string {
+    return this.validatedConfig.JWT_SECRET;
+  }
+
+  /**
+   * Get JWT expiration time
+   */
+  get jwtExpiration(): StringValue {
+    return this.validatedConfig.JWT_EXPIRATION;
   }
 }
