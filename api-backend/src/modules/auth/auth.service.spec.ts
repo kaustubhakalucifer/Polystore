@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 jest.mock('bcryptjs');
 import { UsersService } from '../users/users.service';
 import { PlatformRole, UserStatus } from '../../core/enums';
+import { UserDocument } from '../users/schemas/user.schema';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -47,7 +48,9 @@ describe('AuthService', () => {
         status: UserStatus.ACTIVE,
       };
 
-      usersService.findByEmail.mockResolvedValue(mockUser as any);
+      usersService.findByEmail.mockResolvedValue(
+        mockUser as unknown as UserDocument,
+      );
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       jwtService.signAsync.mockResolvedValue('testAccessToken');
 
@@ -83,7 +86,9 @@ describe('AuthService', () => {
         passwordHash: 'hashedPassword',
       };
 
-      usersService.findByEmail.mockResolvedValue(mockUser as any);
+      usersService.findByEmail.mockResolvedValue(
+        mockUser as unknown as UserDocument,
+      );
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(authService.login(loginDto)).rejects.toThrow(
