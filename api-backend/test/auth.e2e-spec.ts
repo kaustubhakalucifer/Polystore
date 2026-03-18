@@ -9,16 +9,90 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../src/modules/users/schemas/user.schema';
 import { PlatformRole, UserStatus } from '../src/core/enums';
 
+type MockUser = Partial<User> & {
+  email: string;
+  passwordHash?: string;
+  otpCode?: string;
+  save: jest.Mock<Promise<MockUser>, []>;
+};
+
 describe('AuthController (e2e)', () => {
   let app: INestApplication<App>;
   let userModel: Model<User>;
   const userEmail = 'test@example.com';
   const userPassword = 'password123';
 
+  const mockUserStore = new Map<string, MockUser>();
+
   beforeAll(async () => {
+    const mockUserModel = {
+      findOne: jest.fn(
+        (query: {
+          email: string;
+        }): {
+          select: jest.Mock<Promise<MockUser | null>, []>;
+          exec: jest.Mock<Promise<MockUser | null>, []>;
+        } => {
+          const user = mockUserStore.get(query.email) ?? null;
+
+          const mockSelect = jest.fn().mockReturnThis();
+          const mockExec = jest.fn().mockResolvedValue(user);
+
+          // Provide thenable support for direct await
+          const queryObj = {
+            select: mockSelect,
+            exec: mockExec,
+            then: (resolve: (val: MockUser | null) => void) => resolve(user),
+          } as unknown as {
+            select: jest.Mock<any, []>;
+            exec: jest.Mock<Promise<MockUser | null>, []>;
+          };
+
+          return queryObj;
+        },
+      ) as unknown as typeof userModel.findOne,
+
+      create: jest.fn((data: Partial<MockUser>): MockUser => {
+        const user: MockUser = {
+          ...data,
+          email: data.email!,
+          save: jest.fn().mockImplementation(function (this: MockUser) {
+            mockUserStore.set(this.email, this);
+            return Promise.resolve(this);
+          }) as jest.Mock<Promise<MockUser>, []>,
+        };
+
+        mockUserStore.set(user.email, user);
+        return user;
+      }) as unknown as typeof userModel.create,
+
+      deleteMany: jest.fn((): void => {
+        mockUserStore.clear();
+      }) as unknown as typeof userModel.deleteMany,
+    };
+
+    const MockUserModelConstructor = function (
+      this: MockUser,
+      data: Partial<MockUser>,
+    ) {
+      Object.assign(this, data);
+
+      this.save = jest.fn().mockImplementation(() => {
+        mockUserStore.set(this.email, this);
+        return Promise.resolve(this);
+      }) as jest.Mock<Promise<MockUser>, []>;
+    } as unknown as typeof userModel;
+
+    MockUserModelConstructor.findOne = mockUserModel.findOne;
+    MockUserModelConstructor.create = mockUserModel.create;
+    MockUserModelConstructor.deleteMany = mockUserModel.deleteMany;
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(getModelToken(User.name))
+      .useValue(MockUserModelConstructor)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -26,22 +100,92 @@ describe('AuthController (e2e)', () => {
 
     userModel = moduleFixture.get<Model<User>>(getModelToken(User.name));
 
-    await userModel.deleteMany({ email: userEmail });
-
     const passwordHash = await bcrypt.hash(userPassword, 10);
-    await userModel.create({
+    mockUserStore.set(userEmail, {
       email: userEmail,
       passwordHash,
       platformRole: PlatformRole.USER,
       status: UserStatus.ACTIVE,
       firstName: 'Test',
       lastName: 'User',
-    });
+      save: jest.fn().mockResolvedValue({}),
+    } as unknown as MockUser);
   });
 
   afterAll(async () => {
-    await userModel.deleteMany({ email: userEmail });
     await app.close();
+  });
+
+  describe('Registration Flow', () => {
+    const newEmail = 'newuser@example.com';
+    const password = 'password123';
+    let otpCode: string;
+
+    it('/auth/register (POST) - should return 201 and send OTP', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: newEmail,
+          password,
+          firstName: 'New',
+          lastName: 'User',
+        })
+        .expect(201);
+
+      expect(response.body).toHaveProperty('message', 'OTP sent to email');
+
+      // Verify user was created in DB
+      const user = await userModel
+        .findOne({ email: newEmail })
+        .select('+otpCode');
+      expect(user).toBeDefined();
+      expect(user?.status).toBe(UserStatus.UNVERIFIED);
+      expect(user?.otpCode).toBeDefined();
+
+      if (!user?.otpCode) throw new Error('OTP not generated');
+      otpCode = user.otpCode;
+    });
+
+    it('/auth/register (POST) - should return 400 if user already exists', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: newEmail,
+          password,
+          firstName: 'Another',
+          lastName: 'User',
+        })
+        .expect(400);
+    });
+
+    it('/auth/verify-otp (POST) - should return 401 for invalid OTP', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/verify-otp')
+        .send({
+          email: newEmail,
+          otpCode: '000000', // Wrong OTP
+        })
+        .expect(401);
+    });
+
+    it('/auth/verify-otp (POST) - should return 200 for valid OTP', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/verify-otp')
+        .send({
+          email: newEmail,
+          otpCode,
+        })
+        .expect(200);
+
+      expect(response.body).toHaveProperty(
+        'message',
+        'Email verified. Account pending admin approval.',
+      );
+
+      // Verify user status updated
+      const user = await userModel.findOne({ email: newEmail });
+      expect(user?.status).toBe(UserStatus.PENDING);
+    });
   });
 
   it('/auth/login (POST) - should return access token with valid credentials', async () => {
