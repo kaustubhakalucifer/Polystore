@@ -11,6 +11,7 @@ describe('EnvironmentDto', () => {
       const validConfig = {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         PORT: '3000',
         NODE_ENV: 'development',
       };
@@ -25,6 +26,7 @@ describe('EnvironmentDto', () => {
       const invalidConfig = {
         MONGODB_URI: '',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         PORT: '3000',
         NODE_ENV: 'development',
       };
@@ -40,6 +42,7 @@ describe('EnvironmentDto', () => {
     it('should fail validation when MONGODB_URI is not provided', () => {
       const invalidConfig = {
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         PORT: '3000',
         NODE_ENV: 'development',
       };
@@ -54,6 +57,7 @@ describe('EnvironmentDto', () => {
       const configWithOptionalPort = {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         NODE_ENV: 'development',
       };
 
@@ -67,6 +71,7 @@ describe('EnvironmentDto', () => {
       const configWithOptionalEnv = {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         PORT: '3000',
       };
 
@@ -80,6 +85,7 @@ describe('EnvironmentDto', () => {
       const invalidConfig = {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         PORT: '3000',
         NODE_ENV: 'invalid',
       };
@@ -97,6 +103,7 @@ describe('EnvironmentDto', () => {
         const config = {
           MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
           ENCRYPTION_KEY: VALID_KEY,
+          JWT_SECRET: 'test-secret',
           PORT: '3000',
           NODE_ENV: envValue,
         };
@@ -112,6 +119,7 @@ describe('EnvironmentDto', () => {
       const configWithNumericPort = {
         MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/testdb',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
         PORT: 3000,
         NODE_ENV: 'development',
       };
@@ -129,6 +137,7 @@ describe('EnvironmentDto', () => {
         MONGODB_URI:
           'mongodb+srv://username:password@cluster-name.mongodb.net/database?retryWrites=true&w=majority',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
       };
 
       const dto = plainToInstance(EnvironmentDto, atlasConfig);
@@ -141,6 +150,7 @@ describe('EnvironmentDto', () => {
       const standardConfig = {
         MONGODB_URI: 'mongodb://localhost:27017/polystore',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
       };
 
       const dto = plainToInstance(EnvironmentDto, standardConfig);
@@ -154,6 +164,7 @@ describe('EnvironmentDto', () => {
         MONGODB_URI:
           'mongodb://user:password@localhost:27017/admin?authSource=admin',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
       };
 
       const dto = plainToInstance(EnvironmentDto, authConfig);
@@ -168,6 +179,7 @@ describe('EnvironmentDto', () => {
       const dto = plainToInstance(EnvironmentDto, {
         MONGODB_URI: 'mongodb://localhost:27017/test',
         ENCRYPTION_KEY: VALID_KEY,
+        JWT_SECRET: 'test-secret',
       });
       expect(validateSync(dto).length).toBe(0);
     });
