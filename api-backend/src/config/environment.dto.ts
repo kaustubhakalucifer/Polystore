@@ -11,6 +11,7 @@ import {
   IsEmail,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { type StringValue } from 'ms';
 
 /**
  * Environment variables validation DTO
@@ -74,12 +75,51 @@ export class EnvironmentDto {
   @IsOptional()
   @Transform(({ value }: { value?: string }) => value?.trim())
   SUPER_ADMIN_PASSWORD?: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'JWT_SECRET is required' })
+  @Transform(({ value }: { value?: string }) => value?.trim())
+  JWT_SECRET!: string;
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }: { value?: StringValue }) => value?.trim())
+  JWT_EXPIRATION?: StringValue;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_HOST!: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(65535)
+  @Transform(({ value }: { value?: string | number }) => {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value === 'number') return value;
+    const normalized = value.trim();
+    return normalized === '' ? Number.NaN : Number(normalized);
+  })
+  SMTP_PORT!: number;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_USER!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_PASS!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SMTP_FROM!: string;
 }
 
 /**
  * Default values for environment variables
  */
 export const DEFAULT_ENV_VALUES = {
+  JWT_EXPIRATION: '1d' as StringValue,
   PORT: 3000,
   NODE_ENV: 'development',
 };

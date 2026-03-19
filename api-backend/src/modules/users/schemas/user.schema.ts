@@ -28,6 +28,12 @@ export class User {
 
   @Prop({ type: String, enum: UserStatus, default: UserStatus.PENDING })
   status: UserStatus;
+
+  @Prop({ select: false })
+  otpCode?: string;
+
+  @Prop({ select: false })
+  otpExpiresAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

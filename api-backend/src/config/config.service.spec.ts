@@ -12,6 +12,12 @@ describe('ConfigService', () => {
     process.env.PORT = '3000';
     // 64-char hex test key (32 bytes) — safe to use in tests only
     process.env.ENCRYPTION_KEY = 'a'.repeat(64);
+    process.env.JWT_SECRET = 'test-secret';
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_PORT = '587';
+    process.env.SMTP_USER = 'user';
+    process.env.SMTP_PASS = 'pass';
+    process.env.SMTP_FROM = 'noreply@example.com';
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule],
@@ -27,6 +33,12 @@ describe('ConfigService', () => {
     delete process.env.PORT;
     delete process.env.MONGODB_DB_NAME;
     delete process.env.ENCRYPTION_KEY;
+    delete process.env.JWT_SECRET;
+    delete process.env.SMTP_HOST;
+    delete process.env.SMTP_PORT;
+    delete process.env.SMTP_USER;
+    delete process.env.SMTP_PASS;
+    delete process.env.SMTP_FROM;
   });
 
   describe('Initialization', () => {
@@ -77,18 +89,39 @@ describe('ConfigService', () => {
 describe('ConfigService - Default Values', () => {
   let configService: ConfigService;
 
+  beforeEach(() => {
+    process.env.JWT_SECRET = 'test-secret';
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_PORT = '587';
+    process.env.SMTP_USER = 'user';
+    process.env.SMTP_PASS = 'pass';
+    process.env.SMTP_FROM = 'noreply@example.com';
+  });
+
   afterEach(() => {
     delete process.env.NODE_ENV;
     delete process.env.MONGODB_URI;
     delete process.env.PORT;
     delete process.env.MONGODB_DB_NAME;
     delete process.env.ENCRYPTION_KEY;
+    delete process.env.JWT_SECRET;
+    delete process.env.SMTP_HOST;
+    delete process.env.SMTP_PORT;
+    delete process.env.SMTP_USER;
+    delete process.env.SMTP_PASS;
+    delete process.env.SMTP_FROM;
   });
 
   it('should use default PORT when not provided', async () => {
     process.env.NODE_ENV = 'development';
     process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
     process.env.ENCRYPTION_KEY = 'b'.repeat(64);
+    process.env.JWT_SECRET = 'test-secret';
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_PORT = '587';
+    process.env.SMTP_USER = 'user';
+    process.env.SMTP_PASS = 'pass';
+    process.env.SMTP_FROM = 'noreply@example.com';
     delete process.env.PORT;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -102,6 +135,12 @@ describe('ConfigService - Default Values', () => {
   it('should use default NODE_ENV when not provided', async () => {
     process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
     process.env.ENCRYPTION_KEY = 'c'.repeat(64);
+    process.env.JWT_SECRET = 'test-secret';
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_PORT = '587';
+    process.env.SMTP_USER = 'user';
+    process.env.SMTP_PASS = 'pass';
+    process.env.SMTP_FROM = 'noreply@example.com';
     delete process.env.NODE_ENV;
     delete process.env.PORT;
 
