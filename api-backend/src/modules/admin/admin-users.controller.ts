@@ -8,18 +8,28 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PlatformRole, UserStatus } from '../../core/enums';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UserIdParamDto } from './dto/user-id-param.dto';
+import { PaginationQueryDto } from './dto/pagination-query.dto';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(PlatformRole.SUPER_ADMIN)
 export class AdminUsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly adminService: AdminService,
+  ) {}
+
+  @Get()
+  async getUsers(@Query() query: PaginationQueryDto) {
+    return this.adminService.getUsers(query);
+  }
 
   @Get('waitlisted')
   async getWaitlistedUsers(@Query() query: GetUsersQueryDto) {
