@@ -14,11 +14,13 @@ describe('AdminUsersController (e2e)', () => {
   let userModel: Model<UserDocument>;
   let accessToken: string;
   let normalAccessToken: string;
-  let pendingUserId: string;
+  let pendingUserIdApprove: string;
+  let pendingUserIdReject: string;
 
   const adminEmail = 'admin@example.com';
   const normalEmail = 'user@example.com';
-  const pendingEmail = 'pending@example.com';
+  const pendingEmailApprove = 'pending-approve@example.com';
+  const pendingEmailReject = 'pending-reject@example.com';
   const password = 'password123';
 
   beforeAll(async () => {
@@ -60,31 +62,57 @@ describe('AdminUsersController (e2e)', () => {
       lastName: 'User',
     });
 
-    // Create Pending User
-    const pendingUser = await userModel.create({
-      email: pendingEmail,
+    // Create Pending User for Approve test
+    const pendingUserApprove = await userModel.create({
+      email: pendingEmailApprove,
       passwordHash,
       platformRole: PlatformRole.USER,
       status: UserStatus.PENDING,
       firstName: 'Pending',
-      lastName: 'User',
+      lastName: 'Approve',
     });
 
-    pendingUserId = (pendingUser._id as unknown as string).toString();
+    pendingUserIdApprove = (
+      pendingUserApprove._id as unknown as string
+    ).toString();
+
+    // Create Pending User for Reject test
+    const pendingUserReject = await userModel.create({
+      email: pendingEmailReject,
+      passwordHash,
+      platformRole: PlatformRole.USER,
+      status: UserStatus.PENDING,
+      firstName: 'Pending',
+      lastName: 'Reject',
+    });
+
+    pendingUserIdReject = (
+      pendingUserReject._id as unknown as string
+    ).toString();
 
     // Log in as Super Admin
     const adminRes = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: adminEmail, password });
 
-    accessToken = (adminRes.body as { accessToken: string }).accessToken;
+    expect(adminRes.status).toBe(200);
+    expect(adminRes.body).toHaveProperty('accessToken');
+    const adminBody = adminRes.body as { accessToken: string };
+    expect(typeof adminBody.accessToken).toBe('string');
+    expect(adminBody.accessToken.length).toBeGreaterThan(0);
+    accessToken = adminBody.accessToken;
 
     // Log in as Normal User
     const userRes = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: normalEmail, password });
 
-    normalAccessToken = (userRes.body as { accessToken: string }).accessToken;
+    expect(userRes.status).toBe(200);
+    expect(userRes.body).toHaveProperty('accessToken');
+    const userBody = userRes.body as { accessToken: string };
+    expect(typeof userBody.accessToken).toBe('string');
+    expect(userBody.accessToken.length).toBeGreaterThan(0);
+    normalAccessToken = userBody.accessToken;
   });
 
   afterAll(async () => {
@@ -120,7 +148,7 @@ describe('AdminUsersController (e2e)', () => {
 
     it('/api/admin/users/:id/approve (PATCH) - should approve user', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/api/admin/users/${pendingUserId}/approve`)
+        .patch(`/api/admin/users/${pendingUserIdApprove}/approve`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
@@ -130,7 +158,7 @@ describe('AdminUsersController (e2e)', () => {
 
     it('/api/admin/users/:id/reject (PATCH) - should reject user', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/api/admin/users/${pendingUserId}/reject`)
+        .patch(`/api/admin/users/${pendingUserIdReject}/reject`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
