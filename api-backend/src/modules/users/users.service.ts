@@ -13,4 +13,15 @@ export class UsersService {
   async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
     return this.usersRepository.findByEmailWithPassword(email);
   }
+
+  async findWaitlistedUsers(status: string): Promise<UserDocument[]> {
+    return this.usersRepository.findByStatus(status);
+  }
+
+  async updateUserStatus(
+    id: string,
+    status: string,
+  ): Promise<UserDocument | null> {
+    return this.usersRepository.updateStatus(id, status);
+  }
 }
