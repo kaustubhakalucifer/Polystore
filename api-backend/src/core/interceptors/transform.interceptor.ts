@@ -11,6 +11,10 @@ import { ApiResponse } from '../interfaces/api-response.interface';
 /**
  * Global response interceptor to transform successful API responses into
  * a strict, generic, and typed JSON structure.
+ *
+ * Implements the NestInterceptor interface.
+ * Ensures consistent response bodies across all controller endpoints.
+ * @template T - The type of the data returned by the controller
  */
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<
@@ -19,9 +23,10 @@ export class TransformInterceptor<T> implements NestInterceptor<
 > {
   /**
    * Intercepts the response from the controller and formats it according to `ApiResponse`.
-   * @param context Execution context
-   * @param next Call handler
-   * @returns Observable of the formatted response
+   *
+   * @param context - The execution context of the request
+   * @param next - The call handler to proceed to the route handler
+   * @returns An observable of the formatted response
    */
   intercept(
     context: ExecutionContext,
