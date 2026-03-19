@@ -10,6 +10,9 @@ async function bootstrap() {
   // Get config service to trigger validation
   const configService = app.get(ConfigService);
 
+  // Set global API prefix
+  app.setGlobalPrefix('api');
+
   // Use validation pipe globally
   app.useGlobalPipes(
     new ValidationPipe({

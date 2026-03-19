@@ -19,4 +19,14 @@ export class UsersRepository {
       .select('+passwordHash')
       .exec();
   }
+
+  async findByStatus(status: string): Promise<UserDocument[]> {
+    return this.userModel.find({ status }).exec();
+  }
+
+  async updateStatus(id: string, status: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findByIdAndUpdate(id, { status }, { returnDocument: 'after' })
+      .exec();
+  }
 }

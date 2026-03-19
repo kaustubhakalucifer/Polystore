@@ -96,6 +96,7 @@ describe('AuthController (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
@@ -122,9 +123,9 @@ describe('AuthController (e2e)', () => {
     const password = 'password123';
     let otpCode: string;
 
-    it('/auth/register (POST) - should return 201 and send OTP', async () => {
+    it('/api/auth/register (POST) - should return 201 and send OTP', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/auth/register')
         .send({
           email: newEmail,
           password,
@@ -151,9 +152,9 @@ describe('AuthController (e2e)', () => {
       otpCode = encryptionService.decrypt(user.otpCode);
     });
 
-    it('/auth/register (POST) - should return 400 if user already exists', async () => {
+    it('/api/auth/register (POST) - should return 400 if user already exists', async () => {
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/auth/register')
         .send({
           email: newEmail,
           password,
@@ -163,9 +164,9 @@ describe('AuthController (e2e)', () => {
         .expect(400);
     });
 
-    it('/auth/verify-otp (POST) - should return 401 for invalid OTP', async () => {
+    it('/api/auth/verify-otp (POST) - should return 401 for invalid OTP', async () => {
       await request(app.getHttpServer())
-        .post('/auth/verify-otp')
+        .post('/api/auth/verify-otp')
         .send({
           email: newEmail,
           otpCode: '000000', // Wrong OTP
@@ -173,9 +174,9 @@ describe('AuthController (e2e)', () => {
         .expect(401);
     });
 
-    it('/auth/verify-otp (POST) - should return 200 for valid OTP', async () => {
+    it('/api/auth/verify-otp (POST) - should return 200 for valid OTP', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/verify-otp')
+        .post('/api/auth/verify-otp')
         .send({
           email: newEmail,
           otpCode,
@@ -193,9 +194,9 @@ describe('AuthController (e2e)', () => {
     });
   });
 
-  it('/auth/login (POST) - should return access token with valid credentials', async () => {
+  it('/api/auth/login (POST) - should return access token with valid credentials', async () => {
     const response = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: userEmail, password: userPassword })
       .expect(200);
 
@@ -204,23 +205,23 @@ describe('AuthController (e2e)', () => {
     expect(typeof body.accessToken).toBe('string');
   });
 
-  it('/auth/login (POST) - should return 401 with invalid password', async () => {
+  it('/api/auth/login (POST) - should return 401 with invalid password', async () => {
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: userEmail, password: 'wrongpassword' })
       .expect(401);
   });
 
-  it('/auth/login (POST) - should return 401 with non-existent email', async () => {
+  it('/api/auth/login (POST) - should return 401 with non-existent email', async () => {
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'nonexistent@example.com', password: userPassword })
       .expect(401);
   });
 
-  it('/auth/login (POST) - should return 400 with invalid email format', async () => {
+  it('/api/auth/login (POST) - should return 400 with invalid email format', async () => {
     await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'not-an-email', password: userPassword })
       .expect(400);
   });
