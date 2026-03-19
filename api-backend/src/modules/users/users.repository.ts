@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
@@ -21,12 +21,21 @@ export class UsersRepository {
   }
 
   async findByStatus(status: string): Promise<UserDocument[]> {
-    return this.userModel.find({ status }).exec();
+    return this.userModel.find({ status: String(status) }).exec();
   }
 
   async updateStatus(id: string, status: string): Promise<UserDocument | null> {
+    if (typeof id !== 'string' || !Types.ObjectId.isValid(id)) {
+      return null;
+    }
+
+    const objectId = new Types.ObjectId(id);
     return this.userModel
-      .findByIdAndUpdate(id, { status }, { returnDocument: 'after' })
+      .findByIdAndUpdate(
+        objectId,
+        { status: String(status) },
+        { returnDocument: 'after' },
+      )
       .exec();
   }
 }

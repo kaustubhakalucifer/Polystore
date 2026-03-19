@@ -94,19 +94,21 @@ describe('AdminUsersController (e2e)', () => {
 
   describe('Admin Users API', () => {
     it('/api/admin/users (GET) - should fail if unauthenticated', async () => {
-      await request(app.getHttpServer()).get('/api/admin/users').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/admin/users/waitlisted')
+        .expect(401);
     });
 
     it('/api/admin/users (GET) - should fail if not SUPER_ADMIN', async () => {
       await request(app.getHttpServer())
-        .get('/api/admin/users')
+        .get('/api/admin/users/waitlisted')
         .set('Authorization', `Bearer ${normalAccessToken}`)
         .expect(403);
     });
 
     it('/api/admin/users (GET) - should get waitlisted users', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/admin/users')
+        .get('/api/admin/users/waitlisted')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
