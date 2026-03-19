@@ -36,7 +36,7 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(registerDto.password, 10);
-    const otpCode = crypto.randomInt(100000, 999999).toString();
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
     const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
     // Encrypt the OTP code before storing
@@ -53,8 +53,8 @@ export class AuthService {
       otpExpiresAt,
     });
 
-    await this.emailService.sendOtp(registerDto.email, otpCode);
     await newUser.save();
+    await this.emailService.sendOtp(registerDto.email, otpCode);
   }
 
   async verifyOtp(verifyDto: VerifyOtpDto): Promise<void> {
