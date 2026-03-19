@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { PaginatedResult } from '../../core/interfaces/paginated.interface';
-import { UserStatus } from '../../core/enums';
 
 @Injectable()
 export class AdminService {
@@ -16,12 +15,20 @@ export class AdminService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const status = query.status;
+    const search = query.search;
 
-    const filters: Record<string, string> = {};
+    const filters: Record<string, any> = {};
+
     if (status) {
       filters.status = status;
-    } else {
-      filters.status = UserStatus.PENDING;
+    }
+
+    if (search) {
+      filters.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+      ];
     }
 
     const skip = (page - 1) * limit;

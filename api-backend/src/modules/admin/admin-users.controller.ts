@@ -13,7 +13,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PlatformRole, UserStatus } from '../../core/enums';
-import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UserIdParamDto } from './dto/user-id-param.dto';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 
@@ -29,12 +28,6 @@ export class AdminUsersController {
   @Get()
   async getUsers(@Query() query: PaginationQueryDto) {
     return this.adminService.getUsers(query);
-  }
-
-  @Get('waitlisted')
-  async getWaitlistedUsers(@Query() query: GetUsersQueryDto) {
-    const status = query.status || UserStatus.PENDING;
-    return this.usersService.findWaitlistedUsers(status);
   }
 
   @Patch(':id/approve')
