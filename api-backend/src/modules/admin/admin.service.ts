@@ -20,14 +20,15 @@ export class AdminService {
     const filters: Record<string, any> = {};
 
     if (status) {
-      filters.status = status;
+      filters.status = String(status);
     }
 
-    if (search) {
+    if (typeof search === 'string' && search.trim() !== '') {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filters.$or = [
-        { email: { $regex: search, $options: 'i' } },
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { firstName: { $regex: escapedSearch, $options: 'i' } },
+        { lastName: { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 
