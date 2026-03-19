@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   OrganizationMembership,
   OrganizationMembershipDocument,
@@ -24,10 +24,28 @@ export class OrganizationAccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<OrganizationRequest>();
 
     // Extract x-organization-id header
-    const organizationId = request.headers['x-organization-id'] as string;
+    const orgIdHeader = request.headers['x-organization-id'];
+
+    if (!orgIdHeader) {
+      throw new BadRequestException('x-organization-id header is required');
+    }
+
+    if (Array.isArray(orgIdHeader)) {
+      throw new BadRequestException(
+        'x-organization-id header must be a single string',
+      );
+    }
+
+    const organizationId = orgIdHeader.trim();
 
     if (!organizationId) {
-      throw new BadRequestException('x-organization-id header is required');
+      throw new BadRequestException('x-organization-id header cannot be empty');
+    }
+
+    if (!Types.ObjectId.isValid(organizationId)) {
+      throw new BadRequestException(
+        'x-organization-id header must be a valid ObjectId',
+      );
     }
 
     // AuthGuard runs before this guard, so req.user should be populated

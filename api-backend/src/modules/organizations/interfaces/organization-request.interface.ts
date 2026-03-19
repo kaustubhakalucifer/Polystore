@@ -10,7 +10,7 @@ export interface OrganizationRequest extends Request {
   user: {
     sub: string;
     email: string;
-    platformRole: PlatformRole;
+    role: PlatformRole;
   };
-  organizationContext: OrganizationContext;
+  organizationContext?: OrganizationContext;
 }

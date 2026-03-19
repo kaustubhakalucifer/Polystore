@@ -41,7 +41,7 @@ describe('OrganizationAccessGuard', () => {
       user: {
         sub: 'userId-123',
         email: 'test@example.com',
-        platformRole: PlatformRole.USER,
+        role: PlatformRole.USER,
       },
       organizationContext: undefined,
     };
@@ -64,15 +64,42 @@ describe('OrganizationAccessGuard', () => {
       mockRequest.headers = {};
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        BadRequestException,
+        new BadRequestException('x-organization-id header is required'),
       );
+    });
+
+    it('should throw BadRequestException if x-organization-id header is an array', async () => {
+      mockRequest.headers = {
+        'x-organization-id': ['507f1f77bcf86cd799439011'],
+      };
+
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        'x-organization-id header is required',
+        new BadRequestException(
+          'x-organization-id header must be a single string',
+        ),
+      );
+    });
+
+    it('should throw BadRequestException if x-organization-id header is empty or whitespace', async () => {
+      mockRequest.headers = { 'x-organization-id': '   ' };
+
+      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+        new BadRequestException('x-organization-id header cannot be empty'),
+      );
+    });
+
+    it('should throw BadRequestException if x-organization-id header is not a valid ObjectId', async () => {
+      mockRequest.headers = { 'x-organization-id': 'invalid-org-id' };
+
+      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+        new BadRequestException(
+          'x-organization-id header must be a valid ObjectId',
+        ),
       );
     });
 
     it('should throw ForbiddenException if user has no membership record for the org', async () => {
-      mockRequest.headers = { 'x-organization-id': 'orgId-456' };
+      mockRequest.headers = { 'x-organization-id': '507f1f77bcf86cd799439011' };
 
       // Mock database returning null (no membership found)
       mockOrgMembershipModel.findOne.mockReturnValue({
@@ -80,26 +107,23 @@ describe('OrganizationAccessGuard', () => {
       });
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        ForbiddenException,
-      );
-      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        'You do not have access to this organization',
+        new ForbiddenException('You do not have access to this organization'),
       );
 
       // Verify correct query was sent to db
       expect(mockOrgMembershipModel.findOne).toHaveBeenCalledWith({
         userId: 'userId-123',
-        organizationId: 'orgId-456',
+        organizationId: '507f1f77bcf86cd799439011',
       });
     });
 
     it('should pass and correctly inject organizationContext if membership exists', async () => {
-      mockRequest.headers = { 'x-organization-id': 'orgId-456' };
+      mockRequest.headers = { 'x-organization-id': '507f1f77bcf86cd799439011' };
 
       // Mock database returning a valid membership record
       const mockMembership = {
         userId: 'userId-123',
-        organizationId: 'orgId-456',
+        organizationId: '507f1f77bcf86cd799439011',
         tenantRole: TenantRole.MANAGER,
       };
 
@@ -112,14 +136,14 @@ describe('OrganizationAccessGuard', () => {
       expect(result).toBe(true);
       expect(mockRequest.organizationContext).toBeDefined();
       expect(mockRequest.organizationContext).toEqual({
-        organizationId: 'orgId-456',
+        organizationId: '507f1f77bcf86cd799439011',
         tenantRole: TenantRole.MANAGER,
       });
 
       // Verify correct query was sent to db
       expect(mockOrgMembershipModel.findOne).toHaveBeenCalledWith({
         userId: 'userId-123',
-        organizationId: 'orgId-456',
+        organizationId: '507f1f77bcf86cd799439011',
       });
     });
   });
