@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '../../config/config.module';
 import { ConfigService } from '../../config/config.service';
 import { UsersModule } from '../users/users.module';
@@ -8,14 +7,14 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EmailModule } from '../../core/email/email.module';
 import { EncryptionModule } from '../../core/encryption/encryption.module';
-import { User, UserSchema } from '../users/schemas/user.schema';
+import { OtpModule } from '../../core/otp/otp.module';
 
 @Module({
   imports: [
     UsersModule,
     EmailModule,
     EncryptionModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    OtpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

@@ -4,18 +4,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../../core/email/email.service';
-import { User, UserDocument } from '../users/schemas/user.schema';
+import { OtpService } from '../../core/otp/otp.service';
 import { PlatformRole, UserStatus } from '../../core/enums';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { EncryptionService } from '../../core/encryption/encryption.service';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -24,25 +21,25 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly encryptionService: EncryptionService,
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly otpService: OtpService,
   ) {}
 
   async register(registerDto: RegisterUserDto): Promise<void> {
-    const existingUser = await this.userModel.findOne({
-      email: registerDto.email.toLowerCase(),
-    });
+    const existingUser = await this.usersService.findByEmail(
+      registerDto.email.toLowerCase(),
+    );
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
 
     const passwordHash = await bcrypt.hash(registerDto.password, 10);
-    const otpCode = crypto.randomInt(100000, 1000000).toString();
-    const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+    const otpCode = this.otpService.generateOtp(6);
+    const otpExpiresAt = this.otpService.calculateExpiry(15);
 
     // Encrypt the OTP code before storing
     const encryptedOtpCode = this.encryptionService.encrypt(otpCode);
 
-    const newUser = new this.userModel({
+    await this.usersService.create({
       email: registerDto.email.toLowerCase(),
       passwordHash,
       firstName: registerDto.firstName,
@@ -53,14 +50,13 @@ export class AuthService {
       otpExpiresAt,
     });
 
-    await newUser.save();
     await this.emailService.sendOtp(registerDto.email, otpCode);
   }
 
   async verifyOtp(verifyDto: VerifyOtpDto): Promise<void> {
-    const user = await this.userModel
-      .findOne({ email: verifyDto.email.toLowerCase() })
-      .select('+otpCode +otpExpiresAt');
+    const user = await this.usersService.findByEmailWithOtp(
+      verifyDto.email.toLowerCase(),
+    );
     if (!user) {
       throw new BadRequestException('User not found');
     }
@@ -78,12 +74,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    if (decryptedOtpCode !== verifyDto.otpCode) {
-      throw new UnauthorizedException('Invalid OTP');
-    }
+    const isOtpValid = this.otpService.verifyOtp(
+      verifyDto.otpCode,
+      decryptedOtpCode,
+      user.otpExpiresAt!,
+    );
 
-    if (!user.otpExpiresAt || user.otpExpiresAt < new Date()) {
-      throw new UnauthorizedException('OTP has expired');
+    if (!isOtpValid) {
+      throw new UnauthorizedException('Invalid or expired OTP');
     }
 
     user.status = UserStatus.PENDING;
