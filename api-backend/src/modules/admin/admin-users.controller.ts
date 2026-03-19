@@ -21,7 +21,7 @@ import { UserIdParamDto } from './dto/user-id-param.dto';
 export class AdminUsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
+  @Get('waitlisted')
   async getWaitlistedUsers(@Query() query: GetUsersQueryDto) {
     const status = query.status || UserStatus.PENDING;
     return this.usersService.findWaitlistedUsers(status);
