@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
+import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
@@ -21,6 +22,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Apply the global response interceptor
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   const port = configService.port;
   await app.listen(port);
