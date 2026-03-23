@@ -34,14 +34,18 @@ export class OtpService {
    * @returns True if the OTP matches and is not expired, false otherwise
    */
   verifyOtp(inputOtp: string, dbOtp: string, expiresAt: Date): boolean {
-    if (inputOtp !== dbOtp) {
+    // Ensure both strings are the same length before comparison
+    if (inputOtp.length !== dbOtp.length) {
       return false;
     }
 
-    if (new Date() > expiresAt) {
-      return false;
-    }
+    const inputBuffer = Buffer.from(inputOtp, 'utf-8');
+    const dbBuffer = Buffer.from(dbOtp, 'utf-8');
 
-    return true;
+    // Use timingSafeEqual to prevent timing attacks
+    const isMatch = crypto.timingSafeEqual(inputBuffer, dbBuffer);
+    const isExpired = new Date() > expiresAt;
+
+    return isMatch && !isExpired;
   }
 }
