@@ -122,28 +122,42 @@ describe('AdminUsersController (e2e)', () => {
 
   describe('Admin Users API', () => {
     it('/api/admin/users (GET) - should fail if unauthenticated', async () => {
-      await request(app.getHttpServer())
-        .get('/api/admin/users/waitlisted')
-        .expect(401);
+      await request(app.getHttpServer()).get('/api/admin/users').expect(401);
     });
 
     it('/api/admin/users (GET) - should fail if not SUPER_ADMIN', async () => {
       await request(app.getHttpServer())
-        .get('/api/admin/users/waitlisted')
+        .get('/api/admin/users')
         .set('Authorization', `Bearer ${normalAccessToken}`)
         .expect(403);
     });
 
-    it('/api/admin/users (GET) - should get waitlisted users', async () => {
+    it('/api/admin/users (GET) - should get users', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/admin/users/waitlisted')
+        .get('/api/admin/users')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      const body = response.body as { status: UserStatus }[];
-      expect(Array.isArray(body)).toBe(true);
-      expect(body.length).toBeGreaterThan(0);
-      expect(body[0].status).toBe(UserStatus.PENDING);
+      const body = response.body as {
+        items: { email: string; status: UserStatus; _id: string }[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+
+      expect(typeof body.total).toBe('number');
+      expect(typeof body.page).toBe('number');
+      expect(typeof body.limit).toBe('number');
+      expect(typeof body.totalPages).toBe('number');
+
+      expect(Array.isArray(body.items)).toBe(true);
+      expect(body.items.length).toBeGreaterThan(0);
+
+      const firstItem = body.items[0];
+      expect(typeof firstItem._id).toBe('string');
+      expect(typeof firstItem.email).toBe('string');
+      expect(Object.values(UserStatus)).toContain(firstItem.status);
     });
 
     it('/api/admin/users/:id/approve (PATCH) - should approve user', async () => {

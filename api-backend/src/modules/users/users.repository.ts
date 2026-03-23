@@ -9,6 +9,11 @@ export class UsersRepository {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
+  async create(user: Partial<User>): Promise<UserDocument> {
+    const newUser = new this.userModel(user);
+    return newUser.save();
+  }
+
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email: String(email) }).exec();
   }
@@ -17,6 +22,13 @@ export class UsersRepository {
     return this.userModel
       .findOne({ email: String(email) })
       .select('+passwordHash')
+      .exec();
+  }
+
+  async findByEmailWithOtp(email: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({ email: String(email) })
+      .select('+otpCode +otpExpiresAt')
       .exec();
   }
 
