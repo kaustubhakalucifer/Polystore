@@ -3,6 +3,11 @@
 @import 'tailwindcss';
 
 @theme {
+  /* Default Font */
+  --font-sans:
+    'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
   /* Define your Polystore palette here */
   --color-poly-50: #f0f7fc;
   --color-poly-100: #e0eff9;
@@ -22,3 +27,5 @@
   --color-surface2-light: #f8fafc;
   --color-surface2-dark: #1e293b;
 }
+
+@custom-variant dark (&:is(.dark *));

@@ -1,0 +1,59 @@
+<div class="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+  <!-- Sidebar -->
+  <aside
+    class="hidden md:flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-full shadow-sm"
+  >
+    <div
+      class="p-4 flex items-center justify-center border-b border-slate-200 dark:border-slate-700 h-16"
+    >
+      <span class="text-xl font-bold text-slate-800 dark:text-white">Polystore</span>
+    </div>
+    <nav class="flex-1 p-4 overflow-y-auto space-y-2">
+      <a
+        href="/admin"
+        class="block px-4 py-2 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200 font-medium"
+        >Dashboard</a
+      >
+      <!-- More nav items could go here -->
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <!-- Topbar -->
+    <header
+      class="h-16 flex items-center justify-between px-6 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm"
+    >
+      <div class="flex items-center">
+        <!-- Mobile menu button placeholder -->
+        <button
+          class="md:hidden mr-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-slate-800 dark:text-white sm:hidden">Polystore</h1>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <app-theme-toggle></app-theme-toggle>
+        <div
+          class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold"
+        >
+          A
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-slate-900 p-6">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
