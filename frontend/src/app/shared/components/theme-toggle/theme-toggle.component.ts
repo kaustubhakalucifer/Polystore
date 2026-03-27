@@ -7,7 +7,7 @@ import { ThemeService } from '../../../core/services/theme.service';
   template: `
     <button
       (click)="themeService.toggleTheme()"
-      class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center"
+      class="p-2 rounded-full bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors shadow-sm border border-slate-200 dark:border-zinc-800 flex items-center justify-center"
       aria-label="Toggle Theme"
     >
       @if (themeService.isDark()) {

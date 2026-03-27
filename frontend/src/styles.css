@@ -23,9 +23,9 @@
 
   /* Surface colors */
   --color-surface-light: #ffffff;
-  --color-surface-dark: #0f172a;
+  --color-surface-dark: #000000;
   --color-surface2-light: #f8fafc;
-  --color-surface2-dark: #1e293b;
+  --color-surface2-dark: #09090b;
 }
 
 @custom-variant dark (&:is(.dark *));
