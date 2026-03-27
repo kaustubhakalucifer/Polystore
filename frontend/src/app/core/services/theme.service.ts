@@ -19,8 +19,8 @@ export class ThemeService {
   }
 
   private initializeTheme(): void {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
       this.themeSignal.set(savedTheme);
     } else {
       // Fallback to system preference

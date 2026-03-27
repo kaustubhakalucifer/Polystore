@@ -17,12 +17,10 @@
         formControlName="email"
         placeholder="you@example.com"
         class="w-full px-5 py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm"
-        [class.border-red-500]="
-          loginForm.controls.email.invalid && loginForm.controls.email.touched
-        "
-        [class.dark:border-red-500]="
-          loginForm.controls.email.invalid && loginForm.controls.email.touched
-        "
+        [ngClass]="{
+          'border-red-500 dark:border-red-500':
+            loginForm.controls.email.invalid && loginForm.controls.email.touched
+        }"
       />
       @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
         <p class="mt-2 text-sm text-red-500">Please enter a valid email address.</p>
@@ -46,12 +44,10 @@
         formControlName="password"
         placeholder="••••••••"
         class="w-full px-5 py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm"
-        [class.border-red-500]="
-          loginForm.controls.password.invalid && loginForm.controls.password.touched
-        "
-        [class.dark:border-red-500]="
-          loginForm.controls.password.invalid && loginForm.controls.password.touched
-        "
+        [ngClass]="{
+          'border-red-500 dark:border-red-500':
+            loginForm.controls.password.invalid && loginForm.controls.password.touched
+        }"
       />
       @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
         <p class="mt-2 text-sm text-red-500">Password is required.</p>
