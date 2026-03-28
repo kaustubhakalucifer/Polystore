@@ -1,7 +1,7 @@
 <div class="min-h-screen flex flex-col lg:flex-row w-full font-sans transition-colors duration-200">
   <!-- Left Panel (60%) -->
   <div
-    class="relative overflow-hidden w-full lg:w-3/5 bg-gradient-to-br from-poly-900 to-poly-700 text-white flex flex-col justify-between p-12 lg:p-24"
+    class="relative overflow-hidden hidden lg:flex w-full lg:w-3/5 bg-gradient-to-br from-poly-900 to-poly-700 text-white flex-col justify-between p-12 lg:p-24"
   >
     <!-- Decorative background shape -->
     <div
@@ -92,9 +92,9 @@
 
   <!-- Right Panel (40%) -->
   <div
-    class="relative w-full lg:w-2/5 bg-surface-light dark:bg-surface-dark flex items-center justify-center p-8 transition-colors duration-200"
+    class="relative w-full flex-1 lg:w-2/5 bg-surface-light dark:bg-surface-dark flex items-center justify-center p-4 sm:p-8 transition-colors duration-200"
   >
-    <div class="absolute top-6 right-6">
+    <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
       <app-theme-toggle></app-theme-toggle>
     </div>
     <router-outlet></router-outlet>
