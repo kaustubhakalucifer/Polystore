@@ -1,14 +1,15 @@
 import { Component, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
@@ -16,6 +17,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toastService = inject(ToastService);
 
   public isLoading = signal(false);
   public errorMessage = signal<string | null>(null);
@@ -57,7 +59,12 @@ export class LoginComponent {
           this.loginForm.enable();
           const msg =
             err.error?.message || 'Login failed. Please check your credentials and try again.';
-          this.errorMessage.set(msg);
+          
+          if (typeof msg === 'string' && msg.includes('queue for approval')) {
+            this.toastService.show(msg, 'info', 5000);
+          } else {
+            this.errorMessage.set(msg);
+          }
         },
       });
   }

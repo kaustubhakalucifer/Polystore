@@ -235,5 +235,23 @@ describe('AuthService', () => {
         UnauthorizedException,
       );
     });
+
+    it('should throw UnauthorizedException with specific message if user is pending', async () => {
+      const mockUser = {
+        _id: 'user123',
+        email: loginDto.email,
+        passwordHash: 'hashedPassword',
+        status: UserStatus.PENDING,
+      };
+
+      usersService.findByEmailWithPassword.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(authService.login(loginDto)).rejects.toThrow(
+        new UnauthorizedException(
+          "You're in queue for approval. Please wait for an administrator to activate your account.",
+        ),
+      );
+    });
   });
 });

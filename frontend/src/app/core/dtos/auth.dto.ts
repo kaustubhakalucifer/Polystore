@@ -6,3 +6,19 @@ export interface LoginRequestDto {
 export interface LoginResponseDto {
   accessToken: string;
 }
+
+export interface RegisterRequestDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface VerifyOtpRequestDto {
+  email: string;
+  otpCode: string;
+}
+
+export interface AuthMessageResponseDto {
+  message: string;
+}
