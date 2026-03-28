@@ -28,7 +28,7 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(
       registerDto.email.toLowerCase(),
     );
-    if (existingUser) {
+    if (existingUser && existingUser.status !== UserStatus.UNVERIFIED) {
       throw new BadRequestException('User already exists');
     }
 
@@ -39,16 +39,25 @@ export class AuthService {
     // Encrypt the OTP code before storing
     const encryptedOtpCode = this.encryptionService.encrypt(otpCode);
 
-    await this.usersService.create({
-      email: registerDto.email.toLowerCase(),
-      passwordHash,
-      firstName: registerDto.firstName,
-      lastName: registerDto.lastName,
-      platformRole: PlatformRole.TENANT_ADMIN,
-      status: UserStatus.UNVERIFIED,
-      otpCode: encryptedOtpCode,
-      otpExpiresAt,
-    });
+    if (existingUser && existingUser.status === UserStatus.UNVERIFIED) {
+      existingUser.passwordHash = passwordHash;
+      existingUser.firstName = registerDto.firstName;
+      existingUser.lastName = registerDto.lastName;
+      existingUser.otpCode = encryptedOtpCode;
+      existingUser.otpExpiresAt = otpExpiresAt;
+      await existingUser.save();
+    } else {
+      await this.usersService.create({
+        email: registerDto.email.toLowerCase(),
+        passwordHash,
+        firstName: registerDto.firstName,
+        lastName: registerDto.lastName,
+        platformRole: PlatformRole.TENANT_ADMIN,
+        status: UserStatus.UNVERIFIED,
+        otpCode: encryptedOtpCode,
+        otpExpiresAt,
+      });
+    }
 
     await this.emailService.sendOtp(registerDto.email, otpCode);
   }
@@ -96,7 +105,7 @@ export class AuthService {
       loginDto.email.toLowerCase(),
     );
 
-    if (!user || !user.passwordHash || user.status !== UserStatus.ACTIVE) {
+    if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -106,6 +115,16 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.status === UserStatus.PENDING) {
+      throw new UnauthorizedException(
+        "You're in queue for approval. Please wait for an administrator to activate your account.",
+      );
+    }
+
+    if (user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('Invalid credentials');
     }
 

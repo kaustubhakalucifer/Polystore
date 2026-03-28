@@ -53,6 +53,7 @@ export class ConfigService implements OnModuleInit {
       SMTP_USER: this.nestConfigService.get<string>('SMTP_USER'),
       SMTP_PASS: this.nestConfigService.get<string>('SMTP_PASS'),
       SMTP_FROM: this.nestConfigService.get<string>('SMTP_FROM'),
+      ALLOWED_ORIGINS: this.nestConfigService.get<string>('ALLOWED_ORIGINS'),
     };
 
     const instance = plainToInstance(EnvironmentDto, envConfig);
@@ -170,5 +171,9 @@ export class ConfigService implements OnModuleInit {
 
   get smtpFrom(): string {
     return this.validatedConfig.SMTP_FROM;
+  }
+
+  get allowedOrigins(): string[] {
+    return this.validatedConfig.ALLOWED_ORIGINS;
   }
 }

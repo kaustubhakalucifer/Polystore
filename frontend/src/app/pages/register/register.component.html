@@ -1,0 +1,336 @@
+<div class="w-full max-w-md mx-auto">
+  <div class="mb-8 sm:mb-10 text-center sm:text-left">
+    <!-- Application Name visible only on mobile -->
+    <div class="lg:hidden mb-6 flex justify-center sm:justify-start">
+      <span class="text-2xl font-bold tracking-wide uppercase text-poly-600 dark:text-poly-400"
+        >POLYSTORE</span
+      >
+    </div>
+
+    @if (currentState() === 'register') {
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-2 sm:mb-3">
+        Create an Account
+      </h2>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-zinc-400">
+        Join us to start managing your store.
+      </p>
+    } @else if (currentState() === 'otp') {
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-2 sm:mb-3">
+        Verify your Email
+      </h2>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-zinc-400">
+        We've sent a 6-digit code to your email. Please enter it below.
+      </p>
+    } @else {
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-2 sm:mb-3">
+        Registration Complete
+      </h2>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-zinc-400">
+        Your email has been verified successfully.
+      </p>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <div
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4"
+    >
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg aria-hidden="true" focusable="false" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+            {{ errorMessage() }}
+          </h3>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (currentState() === 'register') {
+    <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label
+            for="firstName"
+            class="block text-sm font-semibold text-slate-700 dark:text-zinc-300 mb-2"
+            >First Name</label
+          >
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            placeholder="John"
+            class="w-full px-4 py-3 sm:px-5 sm:py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            [ngClass]="{
+              'border-red-500 dark:border-red-500':
+                registerForm.controls.firstName.invalid && registerForm.controls.firstName.touched,
+            }"
+          />
+          @if (registerForm.controls.firstName.invalid && registerForm.controls.firstName.touched) {
+            <p class="mt-2 text-sm text-red-500">First name is required.</p>
+          }
+        </div>
+        <div>
+          <label
+            for="lastName"
+            class="block text-sm font-semibold text-slate-700 dark:text-zinc-300 mb-2"
+            >Last Name</label
+          >
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            placeholder="Doe"
+            class="w-full px-4 py-3 sm:px-5 sm:py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            [ngClass]="{
+              'border-red-500 dark:border-red-500':
+                registerForm.controls.lastName.invalid && registerForm.controls.lastName.touched,
+            }"
+          />
+          @if (registerForm.controls.lastName.invalid && registerForm.controls.lastName.touched) {
+            <p class="mt-2 text-sm text-red-500">Last name is required.</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <label
+          for="email"
+          class="block text-sm font-semibold text-slate-700 dark:text-zinc-300 mb-2"
+          >Email Address</label
+        >
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="you@example.com"
+          class="w-full px-4 py-3 sm:px-5 sm:py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          [ngClass]="{
+            'border-red-500 dark:border-red-500':
+              registerForm.controls.email.invalid && registerForm.controls.email.touched,
+          }"
+        />
+        @if (registerForm.controls.email.invalid && registerForm.controls.email.touched) {
+          <p class="mt-2 text-sm text-red-500">Please enter a valid email address.</p>
+        }
+      </div>
+
+      <div>
+        <label
+          for="password"
+          class="block text-sm font-semibold text-slate-700 dark:text-zinc-300 mb-2"
+          >Password</label
+        >
+        <div class="relative">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            class="w-full px-4 py-3 sm:px-5 sm:py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed pr-12"
+            [ngClass]="{
+              'border-red-500 dark:border-red-500':
+                registerForm.controls.password.invalid && registerForm.controls.password.touched,
+            }"
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-pressed]="showPassword()"
+            [disabled]="isLoading()"
+            class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-300 focus:outline-none"
+          >
+            @if (showPassword()) {
+              <svg aria-hidden="true" focusable="false" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                />
+              </svg>
+            } @else {
+              <svg aria-hidden="true" focusable="false" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            }
+          </button>
+        </div>
+        @if (registerForm.controls.password.invalid && registerForm.controls.password.touched) {
+          <p class="mt-2 text-sm text-red-500">Password must be at least 8 characters.</p>
+        }
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isLoading() || registerForm.disabled"
+        class="relative w-full flex justify-center items-center bg-poly-600 hover:bg-poly-700 text-white font-bold py-3 px-4 sm:py-4 sm:px-6 rounded-xl transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-poly-500 dark:focus:ring-offset-zinc-900 shadow-md text-base sm:text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        @if (isLoading()) {
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Registering...
+        } @else {
+          Create Account
+        }
+      </button>
+
+      <div class="mt-6 text-center text-sm font-medium text-slate-600 dark:text-zinc-400">
+        Already have an account?
+        <a
+          routerLink="/login"
+          class="text-poly-600 hover:text-poly-500 dark:text-poly-400 dark:hover:text-poly-300 transition-colors"
+          >Sign in here</a
+        >
+      </div>
+    </form>
+  } @else if (currentState() === 'otp') {
+    <form [formGroup]="otpForm" (ngSubmit)="onOtpSubmit()" class="space-y-6">
+      <div>
+        <label
+          for="otpCode"
+          class="block text-sm font-semibold text-slate-700 dark:text-zinc-300 mb-2"
+          >6-Digit Code</label
+        >
+        <input
+          id="otpCode"
+          type="text"
+          formControlName="otpCode"
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          class="w-full px-4 py-3 sm:px-5 sm:py-4 border border-slate-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-poly-500 focus:border-poly-500 outline-none transition-all text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-center tracking-[0.5em] text-2xl font-mono"
+          [ngClass]="{
+            'border-red-500 dark:border-red-500':
+              otpForm.controls.otpCode.invalid && otpForm.controls.otpCode.touched,
+          }"
+        />
+        @if (otpForm.controls.otpCode.invalid && otpForm.controls.otpCode.touched) {
+          <p class="mt-2 text-sm text-red-500 text-center">Please enter a valid 6-digit code.</p>
+        }
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isLoading() || otpForm.disabled"
+        class="relative w-full flex justify-center items-center bg-poly-600 hover:bg-poly-700 text-white font-bold py-3 px-4 sm:py-4 sm:px-6 rounded-xl transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-poly-500 dark:focus:ring-offset-zinc-900 shadow-md text-base sm:text-lg mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        @if (isLoading()) {
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Verifying...
+        } @else {
+          Verify Email
+        }
+      </button>
+    </form>
+  } @else {
+    <div class="mt-8">
+      <div class="mb-8 flex justify-center">
+        <div
+          class="h-20 w-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shadow-inner"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            class="h-10 w-10 text-blue-500 dark:text-blue-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-5 mb-8">
+        <h3 class="text-base sm:text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+          <svg aria-hidden="true" focusable="false" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Pending Approval
+        </h3>
+        <p class="text-sm sm:text-base text-blue-700 dark:text-blue-300">
+          You are currently in the queue for approval. Please wait for an administrator to activate your account before you can log in.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        routerLink="/login"
+        class="relative w-full flex justify-center items-center bg-poly-600 hover:bg-poly-700 text-white font-bold py-3 px-4 sm:py-4 sm:px-6 rounded-xl transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-poly-500 dark:focus:ring-offset-zinc-900 shadow-md text-base sm:text-lg mt-8"
+      >
+        Go to Login
+      </button>
+    </div>
+  }
+</div>
