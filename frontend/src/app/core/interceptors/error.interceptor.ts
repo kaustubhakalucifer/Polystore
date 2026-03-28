@@ -34,10 +34,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           }
         } else if (error.status >= 500) {
           toastService.show('An unexpected server error occurred.', 'error', 5000);
-        } else if (error.status === 400) {
+          } else if (error.status === 400) {
           const badRequestMsg = typeof error.error?.message === 'string' 
             ? error.error.message 
-            : 'Bad request. Please check your input.';
+            : (Array.isArray(error.error?.message) ? error.error.message.join(', ') : 'Bad request. Please check your input.');
           toastService.show(badRequestMsg, 'warning', 4000);
         }
       }
