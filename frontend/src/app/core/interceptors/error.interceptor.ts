@@ -16,14 +16,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         if (error.status === 401 || error.status === 403) {
           // If the server provides a specific error message, we display it.
           // Otherwise, we provide a helpful fallback, such as when an account is unverified/pending.
-          const serverMessage = typeof error.error?.message === 'string' 
-            ? error.error.message 
-            : (Array.isArray(error.error?.message) ? error.error.message.join(', ') : null);
+          const serverMessage =
+            typeof error.error?.message === 'string'
+              ? error.error.message
+              : Array.isArray(error.error?.message)
+                ? error.error.message.join(', ')
+                : null;
 
           // Example: Fallback message hinting at account approval
-          const defaultMessage = error.status === 401 
-            ? 'Unauthorized: Invalid credentials or account pending admin approval.' 
-            : 'Forbidden: You do not have permission to access this resource.';
+          const defaultMessage =
+            error.status === 401
+              ? 'Unauthorized: Invalid credentials or account pending admin approval.'
+              : 'Forbidden: You do not have permission to access this resource.';
 
           const isLoginRequest = req.url.includes('/login');
 
@@ -36,17 +40,21 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             localStorage.removeItem('accessToken');
             router.navigate(['/login']);
           }
-          } else if (error.status >= 500) {
-          if (!req.url.includes('/login')) toastService.show('An unexpected server error occurred.', 'error', 5000);
-          } else if (error.status === 400) {
-          const badRequestMsg = typeof error.error?.message === 'string' 
-            ? error.error.message 
-            : (Array.isArray(error.error?.message) ? error.error.message.join(', ') : 'Bad request. Please check your input.');
+        } else if (error.status >= 500) {
+          if (!req.url.includes('/login'))
+            toastService.show('An unexpected server error occurred.', 'error', 5000);
+        } else if (error.status === 400) {
+          const badRequestMsg =
+            typeof error.error?.message === 'string'
+              ? error.error.message
+              : Array.isArray(error.error?.message)
+                ? error.error.message.join(', ')
+                : 'Bad request. Please check your input.';
           if (!req.url.includes('/login')) toastService.show(badRequestMsg, 'warning', 4000);
         }
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };

@@ -27,7 +27,7 @@ export class LoginComponent {
   });
 
   public togglePasswordVisibility(): void {
-    this.showPassword.update(show => !show);
+    this.showPassword.update((show) => !show);
   }
 
   public onSubmit(): void {
