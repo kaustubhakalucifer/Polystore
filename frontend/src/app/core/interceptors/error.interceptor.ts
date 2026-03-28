@@ -25,20 +25,24 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             ? 'Unauthorized: Invalid credentials or account pending admin approval.' 
             : 'Forbidden: You do not have permission to access this resource.';
 
-          toastService.show(serverMessage || defaultMessage, 'error', 5000);
+          const isLoginRequest = req.url.includes('/login');
+
+          if (!isLoginRequest) {
+            toastService.show(serverMessage || defaultMessage, 'error', 5000);
+          }
 
           // Automatically clear token and redirect if unauthorized and not on login page
-          if (error.status === 401 && !req.url.includes('/login')) {
+          if (error.status === 401 && !isLoginRequest) {
             localStorage.removeItem('accessToken');
             router.navigate(['/login']);
           }
-        } else if (error.status >= 500) {
-          toastService.show('An unexpected server error occurred.', 'error', 5000);
+          } else if (error.status >= 500) {
+          if (!req.url.includes('/login')) toastService.show('An unexpected server error occurred.', 'error', 5000);
           } else if (error.status === 400) {
           const badRequestMsg = typeof error.error?.message === 'string' 
             ? error.error.message 
             : (Array.isArray(error.error?.message) ? error.error.message.join(', ') : 'Bad request. Please check your input.');
-          toastService.show(badRequestMsg, 'warning', 4000);
+          if (!req.url.includes('/login')) toastService.show(badRequestMsg, 'warning', 4000);
         }
       }
 
