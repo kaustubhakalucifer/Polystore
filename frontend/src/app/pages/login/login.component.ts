@@ -60,10 +60,17 @@ export class LoginComponent {
           const msg =
             err.error?.message || 'Login failed. Please check your credentials and try again.';
           
-          if (typeof msg === 'string' && msg.includes('queue for approval')) {
+          if (msg && typeof msg === 'object' && 'code' in msg) {
+            const errorObj = msg as { code?: string; message?: string; text?: string };
+            if (errorObj.code === 'PENDING_APPROVAL') {
+              this.toastService.show(errorObj.message || errorObj.text || 'Pending approval.', 'info', 5000);
+            } else {
+              this.errorMessage.set(errorObj.message || errorObj.text || 'Login failed.');
+            }
+          } else if (typeof msg === 'string' && msg.includes('queue for approval')) {
             this.toastService.show(msg, 'info', 5000);
           } else {
-            this.errorMessage.set(msg);
+            this.errorMessage.set(typeof msg === 'string' ? msg : 'Login failed.');
           }
         },
       });
