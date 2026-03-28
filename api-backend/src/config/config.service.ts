@@ -173,7 +173,7 @@ export class ConfigService implements OnModuleInit {
     return this.validatedConfig.SMTP_FROM;
   }
 
-  get allowedOrigins(): string {
+  get allowedOrigins(): string[] {
     return this.validatedConfig.ALLOWED_ORIGINS;
   }
 }

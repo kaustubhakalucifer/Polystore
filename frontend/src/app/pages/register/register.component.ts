@@ -83,6 +83,13 @@ export class RegisterComponent {
       return;
     }
 
+    if (!this.registeredEmail) {
+      this.errorMessage.set('Registration email is missing. Please start over.');
+      this.otpForm.enable();
+      this.isLoading.set(false);
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.otpForm.disable();

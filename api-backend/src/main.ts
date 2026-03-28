@@ -15,11 +15,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Enable CORS for frontend development
-  const allowedOriginsEnv = configService.allowedOrigins;
-  const origin = allowedOriginsEnv.split(',').map((o) => o.trim());
-
   app.enableCors({
-    origin,
+    origin: configService.allowedOrigins,
     credentials: true,
   });
 

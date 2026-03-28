@@ -9,6 +9,9 @@ import {
   Min,
   Max,
   IsEmail,
+  IsArray,
+  ArrayNotEmpty,
+  IsUrl,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { type StringValue } from 'ms';
@@ -114,10 +117,17 @@ export class EnvironmentDto {
   @IsNotEmpty()
   SMTP_FROM!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @Transform(({ value }: { value?: string }) => value?.trim())
-  ALLOWED_ORIGINS!: string;
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUrl({ require_tld: false }, { each: true })
+  @Transform(({ value }: { value?: string }) => {
+    if (!value) return [];
+    return value
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean);
+  })
+  ALLOWED_ORIGINS!: string[];
 }
 
 /**
