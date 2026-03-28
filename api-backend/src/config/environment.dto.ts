@@ -113,6 +113,11 @@ export class EnvironmentDto {
   @IsString()
   @IsNotEmpty()
   SMTP_FROM!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }: { value?: string }) => value?.trim())
+  ALLOWED_ORIGINS!: string;
 }
 
 /**
