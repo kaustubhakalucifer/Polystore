@@ -66,7 +66,11 @@ export class LoginComponent {
           if (msg && typeof msg === 'object' && 'code' in msg) {
             const errorObj = msg as { code?: string; message?: string; text?: string };
             if (errorObj.code === 'PENDING_APPROVAL') {
-              this.toastService.show(errorObj.message || errorObj.text || 'Pending approval.', 'info', 5000);
+              this.toastService.show(
+                errorObj.message || errorObj.text || 'Pending approval.',
+                'info',
+                5000,
+              );
             } else {
               this.errorMessage.set(errorObj.message || errorObj.text || 'Login failed.');
             }

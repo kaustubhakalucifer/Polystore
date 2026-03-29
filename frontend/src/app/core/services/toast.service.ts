@@ -41,7 +41,9 @@ import { CommonModule } from '@angular/common';
       @for (toast of toastService.toasts(); track toast.id) {
         <div
           class="flex justify-between items-center p-4 rounded-md shadow-lg min-w-[250px] bg-white dark:bg-zinc-800 text-slate-900 dark:text-white border-l-4"
-          [attr.aria-live]="toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'"
+          [attr.aria-live]="
+            toast.type === 'error' || toast.type === 'warning' ? 'assertive' : 'polite'
+          "
           [attr.role]="toast.type === 'error' || toast.type === 'warning' ? 'alert' : 'status'"
           aria-atomic="true"
           [ngClass]="{

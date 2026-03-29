@@ -6,15 +6,18 @@ import { User } from '../../../core/dtos/user.dto';
 import { UserStatus } from '../../../core/enums/user-status.enum';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
   templateUrl: './users.component.html',
 })
 export class UsersComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   users = signal<User[]>([]);
   total = signal(0);
@@ -40,14 +43,13 @@ export class UsersComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadUsers();
 
-    this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe((query) => {
-      this.searchQuery.set(query);
-      this.page.set(1);
-      this.loadUsers();
-    });
+    this.searchSubscription = this.searchSubject
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((query) => {
+        this.searchQuery.set(query);
+        this.page.set(1);
+        this.loadUsers();
+      });
   }
 
   ngOnDestroy(): void {
@@ -63,24 +65,26 @@ export class UsersComponent implements OnInit, OnDestroy {
   loadUsers(): void {
     this.loading.set(true);
 
-    this.adminService.getUsers({
-      page: this.page(),
-      limit: this.limit(),
-      search: this.searchQuery() || undefined,
-      status: (this.selectedStatus() as UserStatus) || undefined,
-    }).subscribe({
-      next: (response) => {
-        this.users.set(response.data.items);
-        this.total.set(response.data.total);
-        this.page.set(response.data.page);
-        this.limit.set(response.data.limit);
-        this.totalPages.set(response.data.totalPages);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      }
-    });
+    this.adminService
+      .getUsers({
+        page: this.page(),
+        limit: this.limit(),
+        search: this.searchQuery() || undefined,
+        status: (this.selectedStatus() as UserStatus) || undefined,
+      })
+      .subscribe({
+        next: (response) => {
+          this.users.set(response.data.items);
+          this.total.set(response.data.total);
+          this.page.set(response.data.page);
+          this.limit.set(response.data.limit);
+          this.totalPages.set(response.data.totalPages);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+        },
+      });
   }
 
   onSearch(): void {
@@ -102,10 +106,20 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   getAvatarColor(firstName: string): string {
     const colors = [
-      'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-green-500',
-      'bg-emerald-500', 'bg-teal-500', 'bg-cyan-500', 'bg-blue-500',
-      'bg-indigo-500', 'bg-violet-500', 'bg-purple-500', 'bg-fuchsia-500',
-      'bg-pink-500', 'bg-rose-500'
+      'bg-red-500',
+      'bg-orange-500',
+      'bg-amber-500',
+      'bg-green-500',
+      'bg-emerald-500',
+      'bg-teal-500',
+      'bg-cyan-500',
+      'bg-blue-500',
+      'bg-indigo-500',
+      'bg-violet-500',
+      'bg-purple-500',
+      'bg-fuchsia-500',
+      'bg-pink-500',
+      'bg-rose-500',
     ];
     if (!firstName) return colors[0];
 
@@ -120,8 +134,9 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   formatRole(role: string): string {
     if (!role) return '';
-    return role.split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    return role
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 
@@ -139,24 +154,48 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.openMenuId.set(null);
   }
 
-  approveUser(userId: string): void {
-    if (confirm('Are you sure you want to approve this user?')) {
-      this.adminService.approveUser(userId).subscribe({
+  async approveUser(user: User): Promise<void> {
+    const isConfirmed = await this.confirmDialog.open({
+      title: 'Approve User',
+      message: 'Are you sure you want to approve this user? They will gain access to the platform.',
+      details: [
+        { label: 'Name', value: `${user.firstName} ${user.lastName}` },
+        { label: 'Email', value: user.email },
+      ],
+      confirmText: 'Approve',
+      cancelText: 'Cancel',
+      confirmColor: 'success',
+    });
+
+    if (isConfirmed) {
+      this.adminService.approveUser(user._id).subscribe({
         next: () => {
           this.loadUsers(); // Reload to get updated status
         },
-        error: (err) => console.error('Error approving user:', err)
+        error: (err) => console.error('Error approving user:', err),
       });
     }
   }
 
-  rejectUser(userId: string): void {
-    if (confirm('Are you sure you want to reject this user?')) {
-      this.adminService.rejectUser(userId).subscribe({
+  async rejectUser(user: User): Promise<void> {
+    const isConfirmed = await this.confirmDialog.open({
+      title: 'Reject User',
+      message: 'Are you sure you want to reject this user? They will be denied access.',
+      details: [
+        { label: 'Name', value: `${user.firstName} ${user.lastName}` },
+        { label: 'Email', value: user.email },
+      ],
+      confirmText: 'Reject',
+      cancelText: 'Cancel',
+      confirmColor: 'danger',
+    });
+
+    if (isConfirmed) {
+      this.adminService.rejectUser(user._id).subscribe({
         next: () => {
           this.loadUsers(); // Reload to get updated status
         },
-        error: (err) => console.error('Error rejecting user:', err)
+        error: (err) => console.error('Error rejecting user:', err),
       });
     }
   }
