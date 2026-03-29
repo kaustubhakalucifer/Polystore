@@ -26,7 +26,8 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
-  public currentUser = signal<UserPayload | null>(null);
+  private readonly _currentUser = signal<UserPayload | null>(null);
+  public currentUser = this._currentUser.asReadonly();
 
   constructor() {
     this.loadUserFromToken();
@@ -37,7 +38,10 @@ export class AuthService {
     if (token) {
       try {
         const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) {
+          base64 += '=';
+        }
         const jsonPayload = decodeURIComponent(
           window
             .atob(base64)
@@ -52,18 +56,18 @@ export class AuthService {
         const now = Math.floor(Date.now() / 1000);
         if (!payload.exp || payload.exp <= now) {
           localStorage.removeItem('accessToken');
-          this.currentUser.set(null);
+          this._currentUser.set(null);
           return;
         }
 
-        this.currentUser.set({
+        this._currentUser.set({
           sub: payload.sub,
           email: payload.email,
           role: payload.role,
         });
       } catch {
         localStorage.removeItem('accessToken');
-        this.currentUser.set(null);
+        this._currentUser.set(null);
       }
     }
   }
@@ -87,7 +91,7 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem('accessToken');
-    this.currentUser.set(null);
+    this._currentUser.set(null);
   }
 
   /**
