@@ -6,12 +6,11 @@ import {
   LoginResponseDto,
   RegisterRequestDto,
   VerifyOtpRequestDto,
-  AuthMessageResponseDto,
 } from '../dtos/auth.dto';
 import { environment } from '../../../environments/environment';
 
 import { PlatformRole } from '../enums/platform-role.enum';
-import { DataResponse } from '../dtos/api-response.dto';
+import { DataResponse, MessageResponse } from '../dtos/api-response.dto';
 
 export interface UserPayload {
   sub: string;
@@ -52,7 +51,7 @@ export class AuthService {
             .join(''),
         );
         const payload = JSON.parse(jsonPayload);
-        
+
         const now = Math.floor(Date.now() / 1000);
         if (!payload.exp || payload.exp <= now) {
           localStorage.removeItem('accessToken');
@@ -99,8 +98,8 @@ export class AuthService {
    * @param data The user registration details.
    * @returns An Observable containing a success message.
    */
-  register(data: RegisterRequestDto): Observable<AuthMessageResponseDto> {
-    return this.http.post<AuthMessageResponseDto>(`${this.apiUrl}/register`, data);
+  register(data: RegisterRequestDto): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/register`, data);
   }
 
   /**
@@ -108,7 +107,7 @@ export class AuthService {
    * @param data The email and OTP code.
    * @returns An Observable containing a success message.
    */
-  verifyOtp(data: VerifyOtpRequestDto): Observable<AuthMessageResponseDto> {
-    return this.http.post<AuthMessageResponseDto>(`${this.apiUrl}/verify-otp`, data);
+  verifyOtp(data: VerifyOtpRequestDto): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/verify-otp`, data);
   }
 }
