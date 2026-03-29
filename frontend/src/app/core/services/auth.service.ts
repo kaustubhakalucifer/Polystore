@@ -48,6 +48,14 @@ export class AuthService {
             .join(''),
         );
         const payload = JSON.parse(jsonPayload);
+        
+        const now = Math.floor(Date.now() / 1000);
+        if (!payload.exp || payload.exp <= now) {
+          localStorage.removeItem('accessToken');
+          this.currentUser.set(null);
+          return;
+        }
+
         this.currentUser.set({
           sub: payload.sub,
           email: payload.email,

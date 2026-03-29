@@ -10,7 +10,7 @@ export const platformRoleGuard = (allowedRoles: PlatformRole[]): CanActivateFn =
 
     const user = authService.currentUser();
 
-    if (user && allowedRoles.includes(user.role as PlatformRole)) {
+    if (user && allowedRoles.includes(user.role)) {
       return true;
     }
 
