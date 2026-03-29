@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { PlatformRole } from '../../core/enums/platform-role.enum';
 
 @Component({
   selector: 'app-login',
@@ -43,23 +44,25 @@ export class LoginComponent {
     this.loginForm.disable();
 
     this.authService
-      .loginAdmin({
+      .login({
         email: this.loginForm.controls.email.value,
         password: this.loginForm.controls.password.value,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          localStorage.setItem('accessToken', response.accessToken);
+        next: () => {
           this.isLoading.set(false);
-          this.router.navigate(['/admin']);
+          const role = this.authService.currentUser()?.role;
+          if (role === PlatformRole.SUPER_ADMIN) {
+            this.router.navigate(['/admin']);
+          }
         },
         error: (err) => {
           this.isLoading.set(false);
           this.loginForm.enable();
           const msg =
             err.error?.message || 'Login failed. Please check your credentials and try again.';
-          
+
           if (msg && typeof msg === 'object' && 'code' in msg) {
             const errorObj = msg as { code?: string; message?: string; text?: string };
             if (errorObj.code === 'PENDING_APPROVAL') {

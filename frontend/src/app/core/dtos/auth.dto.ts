@@ -18,7 +18,3 @@ export interface VerifyOtpRequestDto {
   email: string;
   otpCode: string;
 }
-
-export interface AuthMessageResponseDto {
-  message: string;
-}
