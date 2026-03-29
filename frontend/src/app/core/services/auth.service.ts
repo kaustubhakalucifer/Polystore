@@ -10,10 +10,13 @@ import {
 } from '../dtos/auth.dto';
 import { environment } from '../../../environments/environment';
 
+import { PlatformRole } from '../enums/platform-role.enum';
+import { DataResponse } from '../dtos/api-response.dto';
+
 export interface UserPayload {
   sub: string;
   email: string;
-  role: string;
+  role: PlatformRole;
 }
 
 @Injectable({
@@ -33,7 +36,18 @@ export class AuthService {
     const token = localStorage.getItem('accessToken');
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          window
+            .atob(base64)
+            .split('')
+            .map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join(''),
+        );
+        const payload = JSON.parse(jsonPayload);
         this.currentUser.set({
           sub: payload.sub,
           email: payload.email,
@@ -51,10 +65,10 @@ export class AuthService {
    * @param credentials The login credentials (email, password).
    * @returns An Observable containing the access token upon successful login.
    */
-  login(credentials: LoginRequestDto): Observable<LoginResponseDto> {
-    return this.http.post<LoginResponseDto>(`${this.apiUrl}/login`, credentials).pipe(
+  login(credentials: LoginRequestDto): Observable<DataResponse<LoginResponseDto>> {
+    return this.http.post<DataResponse<LoginResponseDto>>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response) => {
-        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('accessToken', response.data.accessToken);
         this.loadUserFromToken();
       }),
     );
