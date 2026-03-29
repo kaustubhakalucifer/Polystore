@@ -43,16 +43,20 @@ export class LoginComponent {
     this.loginForm.disable();
 
     this.authService
-      .loginAdmin({
+      .login({
         email: this.loginForm.controls.email.value,
         password: this.loginForm.controls.password.value,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          localStorage.setItem('accessToken', response.accessToken);
+        next: () => {
           this.isLoading.set(false);
-          this.router.navigate(['/admin']);
+          const role = this.authService.currentUser()?.role;
+          if (role === 'SUPER_ADMIN') {
+            this.router.navigate(['/super-admin']);
+          } else {
+            this.router.navigate(['/admin']);
+          }
         },
         error: (err) => {
           this.isLoading.set(false);
