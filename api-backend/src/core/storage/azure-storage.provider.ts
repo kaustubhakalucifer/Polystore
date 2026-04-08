@@ -11,7 +11,7 @@ import {
   StorageListException,
   StorageUploadException,
 } from '../exceptions/polystore.exception';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 
 export interface AzureStorageProviderConfig {
   connectionString: string;
@@ -38,11 +38,18 @@ export class AzureStorageProvider implements IStorageProvider {
     );
   }
 
+  private ensureValidBlobPath(path: string): void {
+    if (!path || path.trim() === '') {
+      throw new TypeError('Blob path cannot be empty or whitespace');
+    }
+  }
+
   async upload(
     path: string,
     file: Buffer | NodeJS.ReadableStream,
     mimetype?: string,
   ): Promise<string> {
+    this.ensureValidBlobPath(path);
     try {
       const blockBlobClient = this.containerClient.getBlockBlobClient(path);
       const options = mimetype
@@ -53,7 +60,12 @@ export class AzureStorageProvider implements IStorageProvider {
         await blockBlobClient.uploadData(file, options);
       } else {
         // uploadStream handles stream backpressure efficiently
-        await blockBlobClient.uploadStream(file, undefined, undefined, options);
+        await blockBlobClient.uploadStream(
+          file as Readable,
+          undefined,
+          undefined,
+          options,
+        );
       }
 
       return path;
@@ -64,6 +76,7 @@ export class AzureStorageProvider implements IStorageProvider {
   }
 
   async delete(path: string): Promise<void> {
+    this.ensureValidBlobPath(path);
     try {
       const blockBlobClient = this.containerClient.getBlockBlobClient(path);
       // deleteIfExists skips errors if the blob is already missing
@@ -79,8 +92,15 @@ export class AzureStorageProvider implements IStorageProvider {
     options?: { limit?: number; cursor?: string },
   ): Promise<{ keys: string[]; continuationToken?: string }> {
     try {
+      let maxPageSize: number | undefined;
+      if (options?.limit !== undefined) {
+        if (Number.isInteger(options.limit) && options.limit > 0) {
+          maxPageSize = options.limit;
+        }
+      }
+
       const iterator = this.containerClient.listBlobsFlat({ prefix }).byPage({
-        maxPageSize: options?.limit,
+        maxPageSize,
         continuationToken: options?.cursor,
       });
 
@@ -107,6 +127,7 @@ export class AzureStorageProvider implements IStorageProvider {
   }
 
   async download(path: string): Promise<NodeJS.ReadableStream> {
+    this.ensureValidBlobPath(path);
     try {
       const blockBlobClient = this.containerClient.getBlockBlobClient(path);
 
