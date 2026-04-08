@@ -1,10 +1,13 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 
 /**
  * Base exception class for the Polystore platform.
  */
 export class PolystoreException extends HttpException {
-  constructor(message: string, status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR) {
+  constructor(
+    message: string,
+    status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+  ) {
     super(message, status);
   }
 }
@@ -13,7 +16,10 @@ export class PolystoreException extends HttpException {
  * Base exception class for storage-related operations.
  */
 export class StorageException extends PolystoreException {
-  constructor(message: string, status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR) {
+  constructor(
+    message: string,
+    status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+  ) {
     super(message, status);
   }
 }
@@ -32,7 +38,10 @@ export class StorageUploadException extends StorageException {
  */
 export class StorageDownloadException extends StorageException {
   constructor(message: string) {
-    super(`Storage Download Error: ${message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    super(
+      `Storage Download Error: ${message}`,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
