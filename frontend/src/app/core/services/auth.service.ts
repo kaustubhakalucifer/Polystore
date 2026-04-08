@@ -15,6 +15,8 @@ import { DataResponse, MessageResponse } from '../dtos/api-response.dto';
 export interface UserPayload {
   sub: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   role: PlatformRole;
 }
 
@@ -62,6 +64,8 @@ export class AuthService {
         this._currentUser.set({
           sub: payload.sub,
           email: payload.email,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
           role: payload.role,
         });
       } catch {
