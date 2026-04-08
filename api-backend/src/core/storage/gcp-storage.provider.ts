@@ -8,6 +8,7 @@ import {
   StorageUploadException,
 } from '../exceptions/polystore.exception';
 import { pipeline } from 'stream/promises';
+import { PassThrough } from 'stream';
 
 export interface GcpStorageProviderConfig {
   projectId?: string;
@@ -24,6 +25,10 @@ export class GcpStorageProvider implements IStorageProvider {
   private readonly bucket: Bucket;
 
   constructor(config: GcpStorageProviderConfig) {
+    if (!config.bucket || config.bucket.trim() === '') {
+      throw new Error('GCP storage bucket must be provided');
+    }
+
     const storageOptions: StorageOptions = {};
 
     if (config.projectId) {
@@ -83,6 +88,7 @@ export class GcpStorageProvider implements IStorageProvider {
         prefix,
         maxResults: options?.limit,
         pageToken: options?.cursor,
+        autoPaginate: false,
       });
 
       const keys = files.map((file) => file.name);
@@ -97,20 +103,33 @@ export class GcpStorageProvider implements IStorageProvider {
     }
   }
 
-  async download(path: string): Promise<NodeJS.ReadableStream> {
+  download(path: string): Promise<NodeJS.ReadableStream> {
     try {
       const gcsFile = this.bucket.file(path);
+      const readStream = gcsFile.createReadStream();
+      const passThrough = new PassThrough();
 
-      const [exists] = await gcsFile.exists();
-      if (!exists) {
-        throw new StorageFileNotFoundException(path);
-      }
+      readStream.on('error', (error: unknown) => {
+        const err = error as Error & { code?: number };
+        if (err.code === 404 || err.message?.includes('No such object')) {
+          passThrough.emit('error', new StorageFileNotFoundException(path));
+        } else {
+          passThrough.emit(
+            'error',
+            new StorageDownloadException(
+              err.message || 'Unknown download error',
+            ),
+          );
+        }
+      });
 
-      return gcsFile.createReadStream();
+      passThrough.on('error', () => {
+        // No-op to prevent unhandled rejection crashes if caller doesn't attach immediately,
+        // caller will still get the emitted error if they attach correctly.
+      });
+
+      return Promise.resolve(readStream.pipe(passThrough));
     } catch (error: unknown) {
-      if (error instanceof StorageFileNotFoundException) {
-        throw error;
-      }
       const e = error as Error;
       throw new StorageDownloadException(e.message || 'Unknown download error');
     }
