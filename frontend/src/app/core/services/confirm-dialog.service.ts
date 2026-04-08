@@ -27,6 +27,10 @@ export class ConfirmDialogService {
    */
   open(options: ConfirmDialogOptions): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
+      const currentState = this.stateSignal();
+      if (currentState) {
+        currentState.resolve(false);
+      }
       this.stateSignal.set({ options, resolve });
     });
   }

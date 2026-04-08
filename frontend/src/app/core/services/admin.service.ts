@@ -14,8 +14,8 @@ export class AdminService {
 
   getUsers(query: PaginationQueryDto): Observable<DataResponse<PaginatedResult<User>>> {
     let params = new HttpParams();
-    if (query.page) params = params.set('page', query.page.toString());
-    if (query.limit) params = params.set('limit', query.limit.toString());
+    if (query.page != null) params = params.set('page', query.page.toString());
+    if (query.limit != null) params = params.set('limit', query.limit.toString());
     if (query.status) params = params.set('status', query.status);
     if (query.search) params = params.set('search', query.search);
 

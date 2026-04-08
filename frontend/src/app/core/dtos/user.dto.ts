@@ -4,8 +4,8 @@ import { PlatformRole } from '../enums/platform-role.enum';
 export interface User {
   _id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   status: UserStatus;
   platformRole: PlatformRole;
   createdAt: string;

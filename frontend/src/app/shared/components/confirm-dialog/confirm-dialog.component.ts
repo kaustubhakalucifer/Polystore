@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 
@@ -12,7 +12,6 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
       <div
         class="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity"
         (click)="onBackdropClick()"
-        (keyup.escape)="onBackdropClick()"
         tabindex="0"
         aria-modal="true"
         role="dialog"
@@ -144,6 +143,7 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
 export class ConfirmDialogComponent {
   public dialogService = inject(ConfirmDialogService);
 
+  @HostListener('document:keydown.escape')
   onBackdropClick() {
     // We allow dismissing the dialog by clicking the backdrop.
     this.dialogService.close(false);

@@ -30,6 +30,9 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   loading = signal(false);
   openMenuId = signal<string | null>(null);
+  pendingUserId: string | null = null;
+  usersError = signal<string | null>(null);
+  errorMessage = signal<string | null>(null);
 
   private searchSubject = new Subject<string>();
   private searchSubscription!: Subscription;
@@ -64,6 +67,7 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   loadUsers(): void {
     this.loading.set(true);
+    this.usersError.set(null);
 
     this.adminService
       .getUsers({
@@ -81,8 +85,9 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.totalPages.set(response.data.totalPages);
           this.loading.set(false);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
+          this.usersError.set('Failed to load users. Please try again.');
         },
       });
   }
@@ -168,11 +173,17 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
 
     if (isConfirmed) {
+      this.pendingUserId = user._id;
+      this.errorMessage.set(null);
       this.adminService.approveUser(user._id).subscribe({
         next: () => {
           this.loadUsers(); // Reload to get updated status
+          this.pendingUserId = null;
         },
-        error: (err) => console.error('Error approving user:', err),
+        error: (err) => {
+          this.errorMessage.set('Error approving user. Please try again.');
+          this.pendingUserId = null;
+        },
       });
     }
   }
@@ -191,12 +202,30 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
 
     if (isConfirmed) {
+      this.pendingUserId = user._id;
+      this.errorMessage.set(null);
       this.adminService.rejectUser(user._id).subscribe({
         next: () => {
           this.loadUsers(); // Reload to get updated status
+          this.pendingUserId = null;
         },
-        error: (err) => console.error('Error rejecting user:', err),
+        error: (err) => {
+          this.errorMessage.set('Error rejecting user. Please try again.');
+          this.pendingUserId = null;
+        },
       });
     }
+  }
+
+  editUser(user: User): void {
+    console.log('Edit user', user);
+  }
+
+  setUserStatus(user: User, status: UserStatus): void {
+    console.log('Set user status', user, status);
+  }
+
+  deleteUser(user: User): void {
+    console.log('Delete user', user);
   }
 }
