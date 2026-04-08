@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
+import { getAvatarColor } from '../../utils/avatar.util';
 
 @Component({
   selector: 'app-main-layout',
@@ -17,23 +18,6 @@ export class MainLayoutComponent {
   private router = inject(Router);
 
   mobileMenuOpen = false;
-
-  private readonly AVATAR_COLORS = [
-    'bg-red-500',
-    'bg-orange-500',
-    'bg-amber-500',
-    'bg-green-500',
-    'bg-emerald-500',
-    'bg-teal-500',
-    'bg-cyan-500',
-    'bg-blue-500',
-    'bg-indigo-500',
-    'bg-violet-500',
-    'bg-purple-500',
-    'bg-fuchsia-500',
-    'bg-pink-500',
-    'bg-rose-500',
-  ];
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -58,13 +42,6 @@ export class MainLayoutComponent {
   getAvatarColor(): string {
     const user = this.authService.currentUser();
     const str = user?.firstName || user?.email || 'A';
-
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const index = Math.abs(hash) % this.AVATAR_COLORS.length;
-    return this.AVATAR_COLORS[index];
+    return getAvatarColor(str);
   }
 }

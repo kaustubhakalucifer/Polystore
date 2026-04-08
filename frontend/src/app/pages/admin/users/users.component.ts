@@ -8,6 +8,7 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { getAvatarColor } from '../../../core/utils/avatar.util';
 
 @Component({
   selector: 'app-users',
@@ -110,31 +111,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   getAvatarColor(firstName: string): string {
-    const colors = [
-      'bg-red-500',
-      'bg-orange-500',
-      'bg-amber-500',
-      'bg-green-500',
-      'bg-emerald-500',
-      'bg-teal-500',
-      'bg-cyan-500',
-      'bg-blue-500',
-      'bg-indigo-500',
-      'bg-violet-500',
-      'bg-purple-500',
-      'bg-fuchsia-500',
-      'bg-pink-500',
-      'bg-rose-500',
-    ];
-    if (!firstName) return colors[0];
-
-    let hash = 0;
-    for (let i = 0; i < firstName.length; i++) {
-      hash = firstName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const index = Math.abs(hash) % colors.length;
-    return colors[index];
+    return getAvatarColor(firstName);
   }
 
   formatRole(role: string): string {
@@ -218,14 +195,17 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   editUser(user: User): void {
+    // TODO: Implement editUser logic (e.g. open edit dialog or navigate to edit route)
     console.log('Edit user', user);
   }
 
   setUserStatus(user: User, status: UserStatus): void {
+    // TODO: Implement setUserStatus logic (e.g. call this.adminService.updateUserStatus)
     console.log('Set user status', user, status);
   }
 
   deleteUser(user: User): void {
+    // TODO: Implement deleteUser logic (e.g. prompt for confirmation then call this.adminService.deleteUser)
     console.log('Delete user', user);
   }
 }

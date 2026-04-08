@@ -32,7 +32,7 @@
 
       <!-- User Profile -->
       <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-zinc-700">
-        <div class="flex flex-col text-right hidden sm:flex">
+        <div class="flex-col text-right hidden sm:flex">
           <span class="text-sm font-medium text-slate-900 dark:text-white leading-tight">
             @if (authService.currentUser()?.firstName) {
               {{ authService.currentUser()?.firstName }} {{ authService.currentUser()?.lastName }}
