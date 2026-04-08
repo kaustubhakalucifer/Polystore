@@ -15,21 +15,14 @@ export class PolystoreException extends HttpException {
 /**
  * Base exception class for storage-related operations.
  */
-export class StorageException extends PolystoreException {
-  constructor(
-    message: string,
-    status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-  ) {
-    super(message, status);
-  }
-}
+export class StorageException extends PolystoreException {}
 
 /**
  * Exception thrown when a file upload fails.
  */
 export class StorageUploadException extends StorageException {
   constructor(message: string) {
-    super(`Storage Upload Error: ${message}`, HttpStatus.BAD_REQUEST);
+    super(`Storage Upload Error: ${message}`, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -67,7 +60,14 @@ export class StorageListException extends StorageException {
  * Exception thrown when a requested file is not found in storage.
  */
 export class StorageFileNotFoundException extends StorageException {
+  public readonly internalPath: string;
+
   constructor(path: string) {
-    super(`File not found at path: ${path}`, HttpStatus.NOT_FOUND);
+    super('File not found', HttpStatus.NOT_FOUND);
+    this.internalPath = path;
+    const logger = new Logger(StorageFileNotFoundException.name);
+    logger.warn(
+      `StorageFileNotFoundException: File not found at path: ${path}`,
+    );
   }
 }
