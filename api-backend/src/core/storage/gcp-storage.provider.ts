@@ -113,20 +113,14 @@ export class GcpStorageProvider implements IStorageProvider {
       readStream.on('error', (error: unknown) => {
         const err = error as Error & { code?: number };
         if (err.code === 404 || err.message?.includes('No such object')) {
-          passThrough.emit('error', new StorageFileNotFoundException(path));
+          passThrough.destroy(new StorageFileNotFoundException(path));
         } else {
-          passThrough.emit(
-            'error',
+          passThrough.destroy(
             new StorageDownloadException(
               err.message || 'Unknown download error',
             ),
           );
         }
-      });
-
-      passThrough.on('error', () => {
-        // No-op to prevent unhandled rejection crashes if caller doesn't attach immediately,
-        // caller will still get the emitted error if they attach correctly.
       });
 
       return readStream.pipe(passThrough);
