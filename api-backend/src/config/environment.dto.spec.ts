@@ -19,6 +19,7 @@ describe('EnvironmentDto', () => {
         SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'development',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, validConfig);
@@ -39,6 +40,7 @@ describe('EnvironmentDto', () => {
         SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'development',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, invalidConfig);
@@ -60,6 +62,7 @@ describe('EnvironmentDto', () => {
         SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'development',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, invalidConfig);
@@ -79,6 +82,7 @@ describe('EnvironmentDto', () => {
         SMTP_PASS: 'pass',
         SMTP_FROM: 'noreply@example.com',
         NODE_ENV: 'development',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, configWithOptionalPort);
@@ -98,6 +102,7 @@ describe('EnvironmentDto', () => {
         SMTP_PASS: 'pass',
         SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, configWithOptionalEnv);
@@ -141,6 +146,7 @@ describe('EnvironmentDto', () => {
           SMTP_FROM: 'noreply@example.com',
           PORT: '3000',
           NODE_ENV: envValue,
+          ALLOWED_ORIGINS: 'http://localhost:3000',
         };
 
         const dto = plainToInstance(EnvironmentDto, config);
@@ -162,6 +168,7 @@ describe('EnvironmentDto', () => {
         SMTP_FROM: 'noreply@example.com',
         PORT: 3000,
         NODE_ENV: 'development',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, configWithNumericPort);
@@ -183,6 +190,7 @@ describe('EnvironmentDto', () => {
         SMTP_USER: 'user',
         SMTP_PASS: 'pass',
         SMTP_FROM: 'noreply@example.com',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, atlasConfig);
@@ -201,6 +209,7 @@ describe('EnvironmentDto', () => {
         SMTP_USER: 'user',
         SMTP_PASS: 'pass',
         SMTP_FROM: 'noreply@example.com',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, standardConfig);
@@ -220,6 +229,7 @@ describe('EnvironmentDto', () => {
         SMTP_USER: 'user',
         SMTP_PASS: 'pass',
         SMTP_FROM: 'noreply@example.com',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, authConfig);
@@ -240,6 +250,7 @@ describe('EnvironmentDto', () => {
         SMTP_USER: 'user',
         SMTP_PASS: 'pass',
         SMTP_FROM: 'noreply@example.com',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       });
       expect(validateSync(dto).length).toBe(0);
     });

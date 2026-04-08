@@ -7,6 +7,7 @@ import { EncryptionModule } from './core/encryption/encryption.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AdminModule } from './modules/admin/admin.module';
     UsersModule,
     AuthModule,
     AdminModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
