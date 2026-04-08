@@ -103,7 +103,8 @@ export class GcpStorageProvider implements IStorageProvider {
     }
   }
 
-  download(path: string): Promise<NodeJS.ReadableStream> {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async download(path: string): Promise<NodeJS.ReadableStream> {
     try {
       const gcsFile = this.bucket.file(path);
       const readStream = gcsFile.createReadStream();
@@ -128,7 +129,7 @@ export class GcpStorageProvider implements IStorageProvider {
         // caller will still get the emitted error if they attach correctly.
       });
 
-      return Promise.resolve(readStream.pipe(passThrough));
+      return readStream.pipe(passThrough);
     } catch (error: unknown) {
       const e = error as Error;
       throw new StorageDownloadException(e.message || 'Unknown download error');
