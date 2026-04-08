@@ -39,7 +39,7 @@ export class MainLayoutComponent {
     return '?';
   }
 
-  getAvatarColor(): string {
+  getUserAvatarColor(): string {
     const user = this.authService.currentUser();
     const str = user?.firstName || user?.email || 'A';
     return getAvatarColor(str);

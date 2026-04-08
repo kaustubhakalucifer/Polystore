@@ -7,6 +7,8 @@
     >
       <span>{{ errorMessage() }}</span>
       <button
+        type="button"
+        aria-label="Clear error"
         (click)="errorMessage.set(null)"
         class="text-red-500 hover:text-red-700 focus:outline-none"
       >
@@ -213,6 +215,8 @@
                   <!-- 3-Dot Menu Dropdown -->
                   <div class="relative inline-block text-left">
                     <button
+                      type="button"
+                      aria-label="More actions"
                       (click)="toggleMenu(user._id, $event)"
                       class="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors focus:outline-none"
                       title="More Actions"
@@ -299,6 +303,8 @@
         </div>
         <div class="flex items-center gap-2">
           <button
+            type="button"
+            aria-label="Previous page"
             [disabled]="page() === 1"
             (click)="goToPage(page() - 1)"
             class="p-2 border border-slate-300 dark:border-zinc-700 rounded-md text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -316,6 +322,8 @@
             Page {{ page() }} of {{ totalPages() }}
           </span>
           <button
+            type="button"
+            aria-label="Next page"
             [disabled]="page() === totalPages()"
             (click)="goToPage(page() + 1)"
             class="p-2 border border-slate-300 dark:border-zinc-700 rounded-md text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

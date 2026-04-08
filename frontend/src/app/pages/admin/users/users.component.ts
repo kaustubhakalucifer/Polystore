@@ -9,6 +9,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { getAvatarColor } from '../../../core/utils/avatar.util';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-users',
@@ -19,6 +20,7 @@ import { getAvatarColor } from '../../../core/utils/avatar.util';
 export class UsersComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly router = inject(Router);
 
   users = signal<User[]>([]);
   total = signal(0);
@@ -34,6 +36,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   pendingUserId: string | null = null;
   usersError = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
+  usersRequestSeq = 0;
 
   private searchSubject = new Subject<string>();
   private searchSubscription!: Subscription;
@@ -69,6 +72,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   loadUsers(): void {
     this.loading.set(true);
     this.usersError.set(null);
+    this.usersRequestSeq++;
+    const reqSeq = this.usersRequestSeq;
 
     this.adminService
       .getUsers({
@@ -79,6 +84,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (response) => {
+          if (reqSeq !== this.usersRequestSeq) return;
           this.users.set(response.data.items);
           this.total.set(response.data.total);
           this.page.set(response.data.page);
@@ -87,6 +93,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.loading.set(false);
         },
         error: (err) => {
+          if (reqSeq !== this.usersRequestSeq) return;
           this.loading.set(false);
           this.usersError.set('Failed to load users. Please try again.');
         },
@@ -137,11 +144,14 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   async approveUser(user: User): Promise<void> {
+    if (this.pendingUserId) return;
+    this.pendingUserId = user._id;
+
     const isConfirmed = await this.confirmDialog.open({
       title: 'Approve User',
       message: 'Are you sure you want to approve this user? They will gain access to the platform.',
       details: [
-        { label: 'Name', value: `${user.firstName} ${user.lastName}` },
+        { label: 'Name', value: `${user.firstName || ''} ${user.lastName || ''}` },
         { label: 'Email', value: user.email },
       ],
       confirmText: 'Approve',
@@ -150,7 +160,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
 
     if (isConfirmed) {
-      this.pendingUserId = user._id;
       this.errorMessage.set(null);
       this.adminService.approveUser(user._id).subscribe({
         next: () => {
@@ -162,15 +171,20 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.pendingUserId = null;
         },
       });
+    } else {
+      this.pendingUserId = null;
     }
   }
 
   async rejectUser(user: User): Promise<void> {
+    if (this.pendingUserId) return;
+    this.pendingUserId = user._id;
+
     const isConfirmed = await this.confirmDialog.open({
       title: 'Reject User',
       message: 'Are you sure you want to reject this user? They will be denied access.',
       details: [
-        { label: 'Name', value: `${user.firstName} ${user.lastName}` },
+        { label: 'Name', value: `${user.firstName || ''} ${user.lastName || ''}` },
         { label: 'Email', value: user.email },
       ],
       confirmText: 'Reject',
@@ -179,7 +193,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
 
     if (isConfirmed) {
-      this.pendingUserId = user._id;
       this.errorMessage.set(null);
       this.adminService.rejectUser(user._id).subscribe({
         next: () => {
@@ -191,21 +204,57 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.pendingUserId = null;
         },
       });
+    } else {
+      this.pendingUserId = null;
     }
   }
 
   editUser(user: User): void {
-    // TODO: Implement editUser logic (e.g. open edit dialog or navigate to edit route)
-    console.log('Edit user', user);
+    this.router.navigate(['/admin/users', user._id, 'edit']);
   }
 
   setUserStatus(user: User, status: UserStatus): void {
-    // TODO: Implement setUserStatus logic (e.g. call this.adminService.updateUserStatus)
-    console.log('Set user status', user, status);
+    if (this.pendingUserId) return;
+    this.pendingUserId = user._id;
+    this.errorMessage.set(null);
+    this.adminService.updateUserStatus(user._id, status).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.pendingUserId = null;
+      },
+      error: () => {
+        this.errorMessage.set('Error updating user status. Please try again.');
+        this.pendingUserId = null;
+      },
+    });
   }
 
-  deleteUser(user: User): void {
-    // TODO: Implement deleteUser logic (e.g. prompt for confirmation then call this.adminService.deleteUser)
-    console.log('Delete user', user);
+  async deleteUser(user: User): Promise<void> {
+    if (this.pendingUserId) return;
+    this.pendingUserId = user._id;
+
+    const isConfirmed = await this.confirmDialog.open({
+      title: 'Delete User',
+      message: 'Are you sure you want to delete this user? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmColor: 'danger',
+    });
+
+    if (isConfirmed) {
+      this.errorMessage.set(null);
+      this.adminService.deleteUser(user._id).subscribe({
+        next: () => {
+          this.loadUsers();
+          this.pendingUserId = null;
+        },
+        error: () => {
+          this.errorMessage.set('Error deleting user. Please try again.');
+          this.pendingUserId = null;
+        },
+      });
+    } else {
+      this.pendingUserId = null;
+    }
   }
 }
