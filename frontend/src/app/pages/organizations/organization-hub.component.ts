@@ -10,7 +10,7 @@ import { DatePipe } from '@angular/common';
   selector: 'app-organization-hub',
   standalone: true,
   imports: [ReactiveFormsModule, DatePipe],
-  templateUrl: './organization-hub.component.html'
+  templateUrl: './organization-hub.component.html',
 })
 export class OrganizationHubComponent implements OnInit {
   private organizationService = inject(OrganizationService);
@@ -22,7 +22,7 @@ export class OrganizationHubComponent implements OnInit {
   isModalOpen = signal<boolean>(false);
 
   createOrgForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]]
+    name: ['', [Validators.required, Validators.minLength(2)]],
   });
 
   ngOnInit(): void {
@@ -34,7 +34,7 @@ export class OrganizationHubComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load organizations', err);
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -53,12 +53,12 @@ export class OrganizationHubComponent implements OnInit {
     const name = this.createOrgForm.getRawValue().name;
     this.organizationService.createOrganization(name).subscribe({
       next: (response) => {
-        this.organizations.update(orgs => [...orgs, response.data]);
+        this.organizations.update((orgs) => [...orgs, response.data]);
         this.closeModal();
       },
       error: (err) => {
         console.error('Failed to create organization', err);
-      }
+      },
     });
   }
 

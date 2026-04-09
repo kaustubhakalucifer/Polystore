@@ -92,7 +92,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.totalPages.set(response.data.totalPages);
           this.loading.set(false);
         },
-        error: (err) => {
+        error: () => {
           if (reqSeq !== this.usersRequestSeq) return;
           this.loading.set(false);
           this.usersError.set('Failed to load users. Please try again.');
@@ -166,7 +166,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.loadUsers(); // Reload to get updated status
           this.pendingUserId = null;
         },
-        error: (err) => {
+        error: () => {
           this.errorMessage.set('Error approving user. Please try again.');
           this.pendingUserId = null;
         },
@@ -199,7 +199,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.loadUsers(); // Reload to get updated status
           this.pendingUserId = null;
         },
-        error: (err) => {
+        error: () => {
           this.errorMessage.set('Error rejecting user. Please try again.');
           this.pendingUserId = null;
         },

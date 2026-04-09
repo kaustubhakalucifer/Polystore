@@ -45,7 +45,10 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./pages/organizations/organization-hub.component').then((m) => m.OrganizationHubComponent),
+        loadComponent: () =>
+          import('./pages/organizations/organization-hub.component').then(
+            (m) => m.OrganizationHubComponent,
+          ),
       },
     ],
   },

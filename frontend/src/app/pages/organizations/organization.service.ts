@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 export type ApiResponse<T> = DataResponse<T>;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrganizationService {
   private http = inject(HttpClient);
