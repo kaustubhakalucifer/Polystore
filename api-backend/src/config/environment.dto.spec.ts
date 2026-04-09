@@ -123,12 +123,15 @@ describe('EnvironmentDto', () => {
         SMTP_FROM: 'noreply@example.com',
         PORT: '3000',
         NODE_ENV: 'invalid',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
       };
 
       const dto = plainToInstance(EnvironmentDto, invalidConfig);
       const errors = validateSync(dto);
 
       expect(errors.length).toBeGreaterThan(0);
+      const nodeEnvError = errors.find((e) => e.property === 'NODE_ENV');
+      expect(nodeEnvError).toBeDefined();
     });
 
     it('should accept all valid NODE_ENV values', () => {

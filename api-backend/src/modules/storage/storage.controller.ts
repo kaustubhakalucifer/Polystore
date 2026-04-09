@@ -18,9 +18,11 @@ import {
   DeleteFileDto,
   ListFilesDto,
   DownloadFileDto,
+  UploadFileDto,
 } from './dto/storage.dto';
 import type { Response } from 'express';
 import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 @Controller('storage')
 export class StorageController {
@@ -35,29 +37,11 @@ export class StorageController {
       }),
     )
     file: Express.Multer.File,
-    @Body('path') path: string,
-    @Body('credentials') credentialsStr: string,
+    @Body() dto: UploadFileDto,
   ) {
-    if (!path || !credentialsStr) {
-      throw new HttpException(
-        'Path and credentials are required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    let credentials: StorageCredentials;
-    try {
-      credentials = JSON.parse(credentialsStr) as StorageCredentials;
-    } catch {
-      throw new HttpException(
-        'Invalid credentials format',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     const result = await this.storageService.uploadFile(
-      credentials,
-      path,
+      dto.credentials as unknown as StorageCredentials,
+      dto.path,
       file.buffer,
       file.mimetype,
     );
@@ -66,14 +50,17 @@ export class StorageController {
 
   @Delete('delete')
   async delete(@Body() dto: DeleteFileDto) {
-    await this.storageService.deleteFile(dto.credentials, dto.path);
+    await this.storageService.deleteFile(
+      dto.credentials as unknown as StorageCredentials,
+      dto.path,
+    );
     return { success: true };
   }
 
   @Post('list')
   async list(@Body() dto: ListFilesDto) {
     return this.storageService.listFiles(
-      dto.credentials,
+      dto.credentials as unknown as StorageCredentials,
       dto.prefix,
       dto.limit,
       dto.cursor,
@@ -84,7 +71,7 @@ export class StorageController {
   async download(@Body() dto: DownloadFileDto, @Res() res: Response) {
     try {
       const stream = await this.storageService.downloadFile(
-        dto.credentials,
+        dto.credentials as unknown as StorageCredentials,
         dto.path,
       );
 
@@ -96,11 +83,16 @@ export class StorageController {
       if (Buffer.isBuffer(stream)) {
         res.send(stream);
       } else {
-        (stream as Readable).pipe(res);
+        await pipeline(stream as Readable, res);
       }
     } catch (error: unknown) {
-      const e = error as Error;
-      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Download failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

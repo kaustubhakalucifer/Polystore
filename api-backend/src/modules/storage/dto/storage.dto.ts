@@ -3,31 +3,70 @@ import {
   IsNotEmpty,
   IsObject,
   IsOptional,
-  IsNumber,
+  IsInt,
+  Min,
+  ValidateNested,
+  IsEnum,
 } from 'class-validator';
-import type { StorageCredentials } from '../../../core/storage/storage.factory';
+import { Type, Transform } from 'class-transformer';
+import { StorageProviderType } from '../../../core/storage/storage.factory';
+
+export class StorageCredentialsDto {
+  @IsEnum(StorageProviderType)
+  @IsNotEmpty()
+  type: StorageProviderType;
+
+  @IsObject()
+  @IsNotEmpty()
+  config: Record<string, any>;
+}
+
+export class UploadFileDto {
+  @IsString()
+  @IsNotEmpty()
+  path: string;
+
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value) as unknown;
+      } catch {
+        return value;
+      }
+    }
+    return value as unknown;
+  })
+  @ValidateNested()
+  @Type(() => StorageCredentialsDto)
+  @IsNotEmpty()
+  credentials: StorageCredentialsDto;
+}
 
 export class DeleteFileDto {
   @IsString()
   @IsNotEmpty()
   path: string;
 
-  @IsObject()
+  @ValidateNested()
+  @Type(() => StorageCredentialsDto)
   @IsNotEmpty()
-  credentials: StorageCredentials;
+  credentials: StorageCredentialsDto;
 }
 
 export class ListFilesDto {
-  @IsObject()
+  @ValidateNested()
+  @Type(() => StorageCredentialsDto)
   @IsNotEmpty()
-  credentials: StorageCredentials;
+  credentials: StorageCredentialsDto;
 
   @IsString()
   @IsOptional()
   prefix?: string;
 
-  @IsNumber()
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   limit?: number;
 
   @IsString()
@@ -40,7 +79,8 @@ export class DownloadFileDto {
   @IsNotEmpty()
   path: string;
 
-  @IsObject()
+  @ValidateNested()
+  @Type(() => StorageCredentialsDto)
   @IsNotEmpty()
-  credentials: StorageCredentials;
+  credentials: StorageCredentialsDto;
 }
