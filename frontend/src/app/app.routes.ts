@@ -53,6 +53,21 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'org/:orgId',
+    loadComponent: () =>
+      import('./core/layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
+    canActivate: [authGuard, platformRoleGuard([PlatformRole.TENANT_ADMIN])],
+    children: [
+      {
+        path: 'drive',
+        loadComponent: () =>
+          import('./pages/drive/drive.component').then(
+            (m) => m.DriveComponent,
+          ),
+      },
+    ],
+  },
+  {
     path: '**',
     redirectTo: '/login',
   },

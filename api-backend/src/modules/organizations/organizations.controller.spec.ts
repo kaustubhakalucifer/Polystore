@@ -3,15 +3,8 @@ import { OrganizationsController } from './organizations.controller';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Request } from 'express';
-
-interface AuthenticatedRequest extends Request {
-  user: {
-    sub: string;
-    email: string;
-    role: string;
-  };
-}
+import type { AuthenticatedRequest } from '../../core/interfaces/authenticated-request.interface';
+import { PlatformRole } from '../../core/enums';
 
 describe('OrganizationsController', () => {
   let controller: OrganizationsController;
@@ -57,7 +50,7 @@ describe('OrganizationsController', () => {
         user: {
           sub: 'user123',
           email: 'test@example.com',
-          role: 'TENANT_ADMIN',
+          role: PlatformRole.TENANT_ADMIN,
         },
       } as unknown as AuthenticatedRequest;
 
@@ -75,6 +68,7 @@ describe('OrganizationsController', () => {
       expect(mockOrganizationsService.createOrganization).toHaveBeenCalledWith(
         'Test Org',
         'user123',
+        PlatformRole.TENANT_ADMIN,
       );
       expect(result).toEqual(expectedResult);
     });
@@ -86,7 +80,7 @@ describe('OrganizationsController', () => {
         user: {
           sub: 'user123',
           email: 'test@example.com',
-          role: 'TENANT_ADMIN',
+          role: PlatformRole.TENANT_ADMIN,
         },
       } as unknown as AuthenticatedRequest;
 
@@ -102,6 +96,7 @@ describe('OrganizationsController', () => {
 
       expect(mockOrganizationsService.getOrganizations).toHaveBeenCalledWith(
         'user123',
+        PlatformRole.TENANT_ADMIN,
       );
       expect(result).toEqual(expectedResult);
     });

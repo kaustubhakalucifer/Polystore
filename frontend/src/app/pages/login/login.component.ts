@@ -57,6 +57,10 @@ export class LoginComponent {
             this.router.navigate(['/admin']);
           } else if (role === PlatformRole.TENANT_ADMIN) {
             this.router.navigate(['/organizations']);
+          } else {
+            this.loginForm.enable();
+            this.toastService.show('Logged in successfully.', 'success');
+            this.router.navigate(['/']);
           }
         },
         error: (err) => {

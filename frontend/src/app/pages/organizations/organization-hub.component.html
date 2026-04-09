@@ -33,6 +33,7 @@
           <div
             (click)="navigateToOrg(org._id)"
             (keyup.enter)="navigateToOrg(org._id)"
+            (keydown.space)="$event.preventDefault(); navigateToOrg(org._id)"
             tabindex="0"
             role="button"
             class="group relative bg-white dark:bg-zinc-900/50 rounded-2xl p-6 shadow-sm hover:shadow-md border border-slate-200 dark:border-zinc-800 hover:border-poly-300 dark:hover:border-poly-700 focus:outline-none focus:ring-2 focus:ring-poly-500 cursor-pointer transition-all duration-300 overflow-hidden"
@@ -149,22 +150,23 @@
     <div
       class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
       (click)="closeModal()"
-      (keyup.enter)="closeModal()"
-      tabindex="-1"
-      role="button"
-      aria-label="Close Modal"
+      aria-hidden="true"
     ></div>
 
     <!-- Modal Content -->
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="createOrgHeading"
       class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl shadow-xl z-10 overflow-hidden transform transition-all border border-slate-200 dark:border-zinc-800"
     >
       <div
         class="px-6 py-5 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center"
       >
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Create New Organization</h3>
+        <h3 id="createOrgHeading" class="text-lg font-bold text-slate-900 dark:text-white">Create New Organization</h3>
         <button
           (click)="closeModal()"
+          aria-label="Close"
           class="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,7 +209,7 @@
           </button>
           <button
             type="submit"
-            [disabled]="createOrgForm.invalid"
+            [disabled]="createOrgForm.invalid || isCreating()"
             class="px-5 py-2.5 text-sm font-medium text-white bg-poly-500 hover:bg-poly-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-all"
           >
             Create Organization

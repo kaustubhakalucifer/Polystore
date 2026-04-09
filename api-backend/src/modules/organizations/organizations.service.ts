@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -9,7 +9,7 @@ import {
   OrganizationMembership,
   OrganizationMembershipDocument,
 } from './schemas/organization-membership.schema';
-import { TenantRole } from '../../core/enums';
+import { TenantRole, PlatformRole } from '../../core/enums';
 
 @Injectable()
 export class OrganizationsService {
@@ -20,27 +20,48 @@ export class OrganizationsService {
     private membershipModel: Model<OrganizationMembershipDocument>,
   ) {}
 
-  async createOrganization(name: string, userId: string) {
-    const org = new this.orgModel({
-      name,
-      tenantAdminId: userId,
-      cloudConfigurations: [],
-    });
+  async createOrganization(name: string, userId: string, role: string) {
+    if (role !== (PlatformRole.TENANT_ADMIN as string)) {
+      throw new ForbiddenException(
+        'Only tenant admins can create organizations',
+      );
+    }
 
-    const savedOrg = await org.save();
+    const session = await this.orgModel.db.startSession();
+    session.startTransaction();
 
-    const membership = new this.membershipModel({
-      userId,
-      organizationId: savedOrg._id,
-      tenantRole: TenantRole.MANAGER,
-    });
+    try {
+      const org = new this.orgModel({
+        name,
+        tenantAdminId: userId,
+        cloudConfigurations: [],
+      });
 
-    await membership.save();
+      const savedOrg = await org.save({ session });
 
-    return savedOrg;
+      const membership = new this.membershipModel({
+        userId,
+        organizationId: savedOrg._id,
+        tenantRole: TenantRole.OWNER,
+      });
+
+      await membership.save({ session });
+
+      await session.commitTransaction();
+      return savedOrg;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
 
-  async getOrganizations(userId: string) {
+  async getOrganizations(userId: string, role: string) {
+    if (role !== (PlatformRole.TENANT_ADMIN as string)) {
+      throw new ForbiddenException('Only tenant admins can view organizations');
+    }
+
     const memberships = await this.membershipModel
       .find({ userId })
       .populate('organizationId')

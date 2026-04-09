@@ -3,7 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { OrganizationsService } from './organizations.service';
 import { Organization } from './schemas/organization.schema';
 import { OrganizationMembership } from './schemas/organization-membership.schema';
-import { TenantRole } from '../../core/enums';
+import { TenantRole, PlatformRole } from '../../core/enums';
 
 describe('OrganizationsService', () => {
   let service: OrganizationsService;
@@ -26,6 +26,14 @@ describe('OrganizationsService', () => {
     }
 
     save = mockOrgSave;
+    static db = {
+      startSession: jest.fn().mockResolvedValue({
+        startTransaction: jest.fn(),
+        commitTransaction: jest.fn(),
+        abortTransaction: jest.fn(),
+        endSession: jest.fn(),
+      }),
+    };
   }
 
   class MockMembershipModel {
@@ -74,6 +82,7 @@ describe('OrganizationsService', () => {
     it('should create an organization and a membership', async () => {
       const name = 'Test Org';
       const userId = 'user123';
+      const role = PlatformRole.TENANT_ADMIN;
 
       const mockCreatedOrg = {
         _id: 'org-mock-id',
@@ -85,7 +94,7 @@ describe('OrganizationsService', () => {
       mockOrgSave.mockResolvedValue(mockCreatedOrg);
       mockMembershipSave.mockResolvedValue(true);
 
-      const result = await service.createOrganization(name, userId);
+      const result = await service.createOrganization(name, userId, role);
 
       expect(mockOrgSave).toHaveBeenCalled();
       expect(mockMembershipSave).toHaveBeenCalled();
@@ -96,6 +105,7 @@ describe('OrganizationsService', () => {
   describe('getOrganizations', () => {
     it('should return organizations mapped from memberships', async () => {
       const userId = 'user123';
+      const role = PlatformRole.TENANT_ADMIN;
 
       const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
       const mockMemberships = [
@@ -110,7 +120,7 @@ describe('OrganizationsService', () => {
       const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
       membershipModel.find.mockReturnValue({ populate: mockPopulate });
 
-      const result = await service.getOrganizations(userId);
+      const result = await service.getOrganizations(userId, role);
 
       expect(membershipModel.find).toHaveBeenCalledWith({ userId });
       expect(mockPopulate).toHaveBeenCalledWith('organizationId');
@@ -120,6 +130,7 @@ describe('OrganizationsService', () => {
 
     it('should filter out null organizations', async () => {
       const userId = 'user123';
+      const role = PlatformRole.TENANT_ADMIN;
 
       const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
       const mockMemberships = [
@@ -135,7 +146,7 @@ describe('OrganizationsService', () => {
       const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
       membershipModel.find.mockReturnValue({ populate: mockPopulate });
 
-      const result = await service.getOrganizations(userId);
+      const result = await service.getOrganizations(userId, role);
 
       expect(result).toHaveLength(1);
       expect(result).toEqual([mockPopulatedOrg]);

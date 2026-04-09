@@ -1,6 +1,6 @@
 export interface Organization {
   _id: string;
   name: string;
-  createdAt: Date;
+  createdAt: string;
   cloudProviderCount?: number;
 }

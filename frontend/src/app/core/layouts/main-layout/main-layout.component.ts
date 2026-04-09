@@ -24,6 +24,10 @@ export class MainLayoutComponent {
     return this.authService.currentUser()?.role === PlatformRole.SUPER_ADMIN;
   }
 
+  get isTenantAdmin(): boolean {
+    return this.authService.currentUser()?.role === PlatformRole.TENANT_ADMIN;
+  }
+
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }

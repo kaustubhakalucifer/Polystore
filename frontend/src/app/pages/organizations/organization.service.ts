@@ -5,7 +5,6 @@ import { Organization } from './organization.interface';
 import { DataResponse } from '../../core/dtos/api-response.dto';
 import { environment } from '../../../environments/environment';
 
-// Alias DataResponse to ApiResponse to match prompt requirement
 export type ApiResponse<T> = DataResponse<T>;
 
 @Injectable({
