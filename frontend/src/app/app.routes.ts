@@ -38,6 +38,18 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'organizations',
+    loadComponent: () =>
+      import('./core/layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
+    canActivate: [authGuard, platformRoleGuard([PlatformRole.TENANT_ADMIN])],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./pages/organizations/organization-hub.component').then((m) => m.OrganizationHubComponent),
+      },
+    ],
+  },
+  {
     path: '**',
     redirectTo: '/login',
   },

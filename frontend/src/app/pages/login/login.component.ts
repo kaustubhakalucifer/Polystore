@@ -55,6 +55,8 @@ export class LoginComponent {
           const role = this.authService.currentUser()?.role;
           if (role === PlatformRole.SUPER_ADMIN) {
             this.router.navigate(['/admin']);
+          } else if (role === PlatformRole.TENANT_ADMIN) {
+            this.router.navigate(['/organizations']);
           }
         },
         error: (err) => {
