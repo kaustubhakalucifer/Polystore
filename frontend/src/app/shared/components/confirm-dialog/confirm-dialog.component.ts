@@ -12,6 +12,7 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
       <div
         class="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity"
         (click)="onBackdropClick()"
+        (keyup.enter)="onBackdropClick()"
         tabindex="0"
         aria-modal="true"
         role="dialog"

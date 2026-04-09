@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ConfigService } from '../../../config/config.service';
+import { AuthenticatedRequest } from '../../../core/interfaces/authenticated-request.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -16,20 +17,18 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
       throw new UnauthorizedException('No token provided');
     }
     try {
-      const payload = await this.jwtService.verifyAsync<{
-        sub: string;
-        email: string;
-        role: string;
-      }>(token, {
+      const payload = await this.jwtService.verifyAsync<
+        AuthenticatedRequest['user']
+      >(token, {
         secret: this.configService.jwtSecret,
       });
-      Object.assign(request, { user: payload });
+      request.user = payload;
     } catch {
       throw new UnauthorizedException('Invalid token');
     }

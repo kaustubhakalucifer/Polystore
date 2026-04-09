@@ -5,6 +5,7 @@ import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { getAvatarColor } from '../../utils/avatar.util';
+import { PlatformRole } from '../../enums/platform-role.enum';
 
 @Component({
   selector: 'app-main-layout',
@@ -18,6 +19,14 @@ export class MainLayoutComponent {
   private router = inject(Router);
 
   mobileMenuOpen = false;
+
+  get isSuperAdmin(): boolean {
+    return this.authService.currentUser()?.role === PlatformRole.SUPER_ADMIN;
+  }
+
+  get isTenantAdmin(): boolean {
+    return this.authService.currentUser()?.role === PlatformRole.TENANT_ADMIN;
+  }
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
