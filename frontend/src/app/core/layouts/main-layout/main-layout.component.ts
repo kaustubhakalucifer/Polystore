@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
+import { OrganizationContextService } from '../../services/organization-context.service';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { getAvatarColor } from '../../utils/avatar.util';
 import { PlatformRole } from '../../enums/platform-role.enum';
@@ -13,12 +14,14 @@ import { PlatformRole } from '../../enums/platform-role.enum';
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent],
   templateUrl: './main-layout.component.html',
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
   public themeService = inject(ThemeService);
   public authService = inject(AuthService);
+  public orgContext = inject(OrganizationContextService);
   private router = inject(Router);
 
   mobileMenuOpen = false;
+  orgDropdownOpen = false;
 
   get isSuperAdmin(): boolean {
     return this.authService.currentUser()?.role === PlatformRole.SUPER_ADMIN;
@@ -28,8 +31,28 @@ export class MainLayoutComponent {
     return this.authService.currentUser()?.role === PlatformRole.TENANT_ADMIN;
   }
 
+  ngOnInit(): void {
+    if (this.isTenantAdmin) {
+      this.orgContext.loadOrganizations();
+    }
+  }
+
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  toggleOrgDropdown(): void {
+    this.orgDropdownOpen = !this.orgDropdownOpen;
+  }
+
+  closeOrgDropdown(): void {
+    this.orgDropdownOpen = false;
+  }
+
+  switchOrganization(orgId: string): void {
+    this.orgContext.setActiveOrganization(orgId);
+    this.closeOrgDropdown();
+    this.router.navigate(['/org', orgId, 'drive']);
   }
 
   logout(): void {

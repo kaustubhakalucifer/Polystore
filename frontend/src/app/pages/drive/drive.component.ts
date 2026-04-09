@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { OrganizationContextService } from '../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-drive',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-zinc-100 p-8">
+    <div class="bg-slate-50 dark:bg-black text-slate-900 dark:text-zinc-100 p-8 h-full">
       <div class="max-w-7xl mx-auto flex flex-col items-center justify-center py-32 text-center">
         <div class="w-16 h-16 bg-poly-100 dark:bg-poly-900/30 text-poly-600 dark:text-poly-400 rounded-2xl flex items-center justify-center mb-6">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +21,7 @@ import { ActivatedRoute } from '@angular/router';
         </p>
         
         <div class="mt-8 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/30 rounded-xl text-emerald-700 dark:text-emerald-400 text-sm font-medium">
-          Navigation succeeded! Organization ID successfully stored in localStorage.
+          Navigation succeeded! Organization ID successfully stored in context.
         </div>
       </div>
     </div>
@@ -28,6 +29,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class DriveComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private orgContextService = inject(OrganizationContextService);
   
   orgId: string | null = null;
 
@@ -35,7 +37,7 @@ export class DriveComponent implements OnInit {
     this.route.parent?.paramMap.subscribe(params => {
       this.orgId = params.get('orgId');
       if (this.orgId) {
-        localStorage.setItem('active_org_id', this.orgId);
+        this.orgContextService.setActiveOrganization(this.orgId);
       }
     });
     
@@ -43,7 +45,7 @@ export class DriveComponent implements OnInit {
     if (!this.orgId) {
       this.orgId = this.route.snapshot.paramMap.get('orgId');
       if (this.orgId) {
-        localStorage.setItem('active_org_id', this.orgId);
+        this.orgContextService.setActiveOrganization(this.orgId);
       }
     }
   }

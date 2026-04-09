@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OrganizationHubComponent } from './organization-hub.component';
 import { OrganizationService } from './organization.service';
+import { OrganizationContextService } from '../../core/services/organization-context.service';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { Organization } from './organization.interface';
@@ -12,6 +13,10 @@ describe('OrganizationHubComponent', () => {
     getOrganizations: ReturnType<typeof vi.fn>;
     createOrganization: ReturnType<typeof vi.fn>;
   };
+  let mockOrgContextService: {
+    loadOrganizations: ReturnType<typeof vi.fn>;
+    setActiveOrganization: ReturnType<typeof vi.fn>;
+  };
   let mockRouter: {
     navigate: ReturnType<typeof vi.fn>;
   };
@@ -22,6 +27,13 @@ describe('OrganizationHubComponent', () => {
       createOrganization: vi.fn().mockReturnValue(of({ data: { _id: 'new1', name: 'New Org' } })),
     };
 
+    mockOrgContextService = {
+      loadOrganizations: vi.fn(),
+      setActiveOrganization: vi.fn((id: string) => {
+        localStorage.setItem('active_org_id', id);
+      }),
+    };
+
     mockRouter = {
       navigate: vi.fn(),
     };
@@ -30,6 +42,7 @@ describe('OrganizationHubComponent', () => {
       imports: [OrganizationHubComponent],
       providers: [
         { provide: OrganizationService, useValue: mockOrganizationService },
+        { provide: OrganizationContextService, useValue: mockOrgContextService },
         { provide: Router, useValue: mockRouter },
       ],
     }).compileComponents();

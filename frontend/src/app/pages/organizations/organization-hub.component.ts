@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrganizationService } from './organization.service';
+import { OrganizationContextService } from '../../core/services/organization-context.service';
 import { Organization } from './organization.interface';
 import { finalize } from 'rxjs/operators';
 
@@ -15,6 +16,7 @@ import { DatePipe } from '@angular/common';
 })
 export class OrganizationHubComponent implements OnInit {
   private organizationService = inject(OrganizationService);
+  private orgContextService = inject(OrganizationContextService);
   private fb = inject(NonNullableFormBuilder);
   private router = inject(Router);
 
@@ -28,6 +30,8 @@ export class OrganizationHubComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Optionally we can also update context organizations here or just let the main layout handle it.
+    // We'll keep local component state for loading for now, but also update the global context.
     this.organizationService.getOrganizations().subscribe({
       next: (response) => {
         this.organizations.set(response.data);
@@ -65,6 +69,8 @@ export class OrganizationHubComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.organizations.update((orgs) => [...orgs, response.data]);
+          // Refresh context to include new org in topbar
+          this.orgContextService.loadOrganizations();
           this.closeModal();
         },
         error: (err) => {
@@ -74,7 +80,7 @@ export class OrganizationHubComponent implements OnInit {
   }
 
   navigateToOrg(orgId: string): void {
-    localStorage.setItem('active_org_id', orgId);
+    this.orgContextService.setActiveOrganization(orgId);
     this.router.navigate(['/org', orgId, 'drive']);
   }
 

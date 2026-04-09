@@ -108,6 +108,14 @@ describe('OrganizationsService', () => {
       const role = PlatformRole.TENANT_ADMIN;
 
       const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
+      const expectedOrg = {
+        _id: 'org1',
+        name: 'Test Org',
+        tenantAdminId: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+        cloudProviderCount: 0,
+      };
       const mockMemberships = [
         {
           userId,
@@ -125,7 +133,7 @@ describe('OrganizationsService', () => {
       expect(membershipModel.find).toHaveBeenCalledWith({ userId });
       expect(mockPopulate).toHaveBeenCalledWith('organizationId');
       expect(mockExec).toHaveBeenCalled();
-      expect(result).toEqual([mockPopulatedOrg]);
+      expect(result).toEqual([expectedOrg]);
     });
 
     it('should filter out null organizations', async () => {
@@ -133,6 +141,14 @@ describe('OrganizationsService', () => {
       const role = PlatformRole.TENANT_ADMIN;
 
       const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
+      const expectedOrg = {
+        _id: 'org1',
+        name: 'Test Org',
+        tenantAdminId: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+        cloudProviderCount: 0,
+      };
       const mockMemberships = [
         {
           userId,
@@ -149,7 +165,7 @@ describe('OrganizationsService', () => {
       const result = await service.getOrganizations(userId, role);
 
       expect(result).toHaveLength(1);
-      expect(result).toEqual([mockPopulatedOrg]);
+      expect(result).toEqual([expectedOrg]);
     });
   });
 });

@@ -73,7 +73,9 @@ export class OrganizationsService {
       .map((m) => m.organizationId)
       .filter((org) => org != null)
       .map((org) => {
-        const obj = org.toObject ? org.toObject() : org;
+        const obj = (
+          org.toObject ? org.toObject() : org
+        ) as OrganizationDocument & { createdAt?: Date; updatedAt?: Date };
         return {
           _id: obj._id,
           name: obj.name,

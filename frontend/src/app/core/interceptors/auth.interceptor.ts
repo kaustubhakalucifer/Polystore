@@ -9,11 +9,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const token = localStorage.getItem('accessToken');
+  const activeOrgId = localStorage.getItem('active_org_id');
+
+  let headers = req.headers;
 
   if (token) {
-    const clonedReq = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`),
-    });
+    headers = headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  if (activeOrgId) {
+    headers = headers.set('x-organization-id', activeOrgId);
+  }
+
+  if (headers !== req.headers) {
+    const clonedReq = req.clone({ headers });
     return next(clonedReq);
   }
 

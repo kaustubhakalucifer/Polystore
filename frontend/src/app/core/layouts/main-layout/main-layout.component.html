@@ -30,6 +30,77 @@
     </div>
 
     <div class="flex items-center gap-4">
+      <!-- Organization Switcher -->
+      @if (isTenantAdmin && orgContext.organizations().length > 0) {
+        <div class="relative">
+          <button
+            (click)="toggleOrgDropdown()"
+            class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-poly-500 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700 transition-colors"
+          >
+            <span class="truncate max-w-[120px]">
+              {{ orgContext.activeOrganization()?.name || 'Select Organization' }}
+            </span>
+            <svg
+              class="w-4 h-4 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          @if (orgDropdownOpen) {
+            <div
+              class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
+            >
+              <div class="py-1">
+                @for (org of orgContext.organizations(); track org._id) {
+                  <button
+                    (click)="switchOrganization(org._id)"
+                    class="flex items-center w-full px-4 py-2.5 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700"
+                    [class.bg-poly-50]="orgContext.activeOrgId() === org._id"
+                    [class.dark:bg-poly-900]="orgContext.activeOrgId() === org._id"
+                  >
+                    <div
+                      class="flex-shrink-0 w-8 h-8 rounded bg-gradient-to-br from-poly-500 to-poly-700 flex items-center justify-center text-white font-bold mr-3"
+                    >
+                      {{ (org.name && org.name.charAt(0)) ? org.name.charAt(0).toUpperCase() : '' }}
+                    </div>
+                    <span
+                      class="flex-1 text-left truncate font-medium"
+                      [class.text-poly-700]="orgContext.activeOrgId() === org._id"
+                      [class.dark:text-poly-400]="orgContext.activeOrgId() === org._id"
+                      [class.text-slate-700]="orgContext.activeOrgId() !== org._id"
+                      [class.dark:text-zinc-200]="orgContext.activeOrgId() !== org._id"
+                    >
+                      {{ org.name }}
+                    </span>
+                    @if (orgContext.activeOrgId() === org._id) {
+                      <svg class="w-5 h-5 text-poly-600 dark:text-poly-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    }
+                  </button>
+                }
+              </div>
+              <div class="border-t border-slate-100 dark:border-zinc-700 p-2 bg-slate-50 dark:bg-zinc-800/50">
+                <a
+                  routerLink="/organizations"
+                  (click)="closeOrgDropdown()"
+                  class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-poly-600 dark:text-poly-400 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-600 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  Manage Organizations
+                </a>
+              </div>
+            </div>
+            <!-- Invisible backdrop to close dropdown -->
+            <div class="fixed inset-0 z-40" (click)="closeOrgDropdown()" aria-hidden="true"></div>
+          }
+        </div>
+      }
+
       <app-theme-toggle></app-theme-toggle>
 
       <!-- User Profile -->
