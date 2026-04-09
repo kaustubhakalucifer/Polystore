@@ -7,6 +7,7 @@ import {
   Min,
   ValidateNested,
   IsEnum,
+  IsNotEmptyObject,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { StorageProviderType } from '../../../core/storage/storage.factory';
@@ -17,7 +18,7 @@ export class StorageCredentialsDto {
   type: StorageProviderType;
 
   @IsObject()
-  @IsNotEmpty()
+  @IsNotEmptyObject()
   config: Record<string, any>;
 }
 

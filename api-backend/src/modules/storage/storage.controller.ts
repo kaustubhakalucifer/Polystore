@@ -75,9 +75,16 @@ export class StorageController {
         dto.path,
       );
 
+      let filename = dto.path.split('/').pop() || 'download';
+      // eslint-disable-next-line no-control-regex
+      filename = filename.replace(/[\x00-\x1F\x7F"]/g, '_');
+      if (!filename.trim()) {
+        filename = 'download';
+      }
+
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="${dto.path.split('/').pop()}"`,
+        `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
       );
 
       if (Buffer.isBuffer(stream)) {
