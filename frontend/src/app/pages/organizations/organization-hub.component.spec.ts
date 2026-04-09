@@ -47,7 +47,7 @@ describe('OrganizationHubComponent', () => {
 
   describe('ngOnInit', () => {
     it('should load organizations and set isLoading to false', () => {
-      const mockOrgs: Organization[] = [{ _id: 'org1', name: 'Org 1', createdAt: new Date() }];
+      const mockOrgs: Organization[] = [{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }];
       mockOrganizationService.getOrganizations.mockReturnValue(of({ data: mockOrgs }));
 
       fixture.detectChanges(); // triggers ngOnInit
@@ -84,7 +84,7 @@ describe('OrganizationHubComponent', () => {
 
     it('should call service, update organizations, and close modal on valid submit', () => {
       // Set initial state
-      component.organizations.set([{ _id: 'org1', name: 'Org 1', createdAt: new Date() }]);
+      component.organizations.set([{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }]);
       component.isModalOpen.set(true);
 
       // Fill form

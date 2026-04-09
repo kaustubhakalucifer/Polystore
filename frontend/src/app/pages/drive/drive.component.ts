@@ -34,11 +34,17 @@ export class DriveComponent implements OnInit {
   ngOnInit(): void {
     this.route.parent?.paramMap.subscribe(params => {
       this.orgId = params.get('orgId');
+      if (this.orgId) {
+        localStorage.setItem('active_org_id', this.orgId);
+      }
     });
     
     // Fallback if not found in parent
     if (!this.orgId) {
       this.orgId = this.route.snapshot.paramMap.get('orgId');
+      if (this.orgId) {
+        localStorage.setItem('active_org_id', this.orgId);
+      }
     }
   }
 }

@@ -64,14 +64,25 @@ export class OrganizationsService {
 
     const memberships = await this.membershipModel
       .find({ userId })
-      .populate('organizationId')
+      .populate<{ organizationId: OrganizationDocument }>('organizationId')
       .exec();
 
-    // Map the memberships to return the populated organization documents.
+    // Map the memberships to return safe organization documents.
     // Ensure we handle cases where organizationId might be a populated object or missing.
     const organizations = memberships
       .map((m) => m.organizationId)
-      .filter((org) => org != null);
+      .filter((org) => org != null)
+      .map((org) => {
+        const obj = org.toObject ? org.toObject() : org;
+        return {
+          _id: obj._id,
+          name: obj.name,
+          tenantAdminId: obj.tenantAdminId,
+          createdAt: obj.createdAt,
+          updatedAt: obj.updatedAt,
+          cloudProviderCount: obj.cloudConfigurations?.length || 0,
+        };
+      });
 
     return organizations;
   }

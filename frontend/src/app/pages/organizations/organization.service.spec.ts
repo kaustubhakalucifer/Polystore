@@ -33,8 +33,8 @@ describe('OrganizationService', () => {
         status: 'success',
         statusCode: 200,
         data: [
-          { _id: 'org1', name: 'Test Org 1', createdAt: new Date() },
-          { _id: 'org2', name: 'Test Org 2', createdAt: new Date() },
+          { _id: 'org1', name: 'Test Org 1', createdAt: new Date().toISOString() },
+          { _id: 'org2', name: 'Test Org 2', createdAt: new Date().toISOString() },
         ] as Organization[],
       };
 
@@ -54,7 +54,7 @@ describe('OrganizationService', () => {
       const mockResponse = {
         status: 'success',
         statusCode: 201,
-        data: { _id: 'org1', name: 'New Org', createdAt: new Date() } as Organization,
+        data: { _id: 'org1', name: 'New Org', createdAt: new Date().toISOString() } as Organization,
       };
 
       service.createOrganization('New Org').subscribe((res) => {
