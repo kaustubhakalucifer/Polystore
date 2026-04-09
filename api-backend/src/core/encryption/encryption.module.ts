@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { EncryptionService } from './encryption.service';
-import { ConfigModule } from 'src/config/config.module';
+import { ConfigModule } from '../../config/config.module';
 
 /**
  * Global encryption module.

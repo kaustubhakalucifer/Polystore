@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { CloudProvider } from 'src/core/enums';
-import { User } from 'src/modules/users/schemas/user.schema';
+import { CloudProvider } from '../../../core/enums';
+import { User } from '../../users/schemas/user.schema';
 
 @Schema({ _id: false })
 class CloudConfiguration {
