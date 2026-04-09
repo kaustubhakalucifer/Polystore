@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { EncryptionService } from './encryption.service';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../../config/config.service';
 import * as crypto from 'crypto';
 
 // A valid 32-byte (64-char hex) test key — never use in production!

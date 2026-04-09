@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../../config/config.service';
 
 /**
  * AES-256-GCM Encryption Service

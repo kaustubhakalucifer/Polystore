@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { User } from 'src/modules/users/schemas/user.schema';
+import { User } from '../../users/schemas/user.schema';
 import { Organization } from './organization.schema';
-import { TenantRole } from 'src/core/enums';
+import { TenantRole } from '../../../core/enums';
 
 export type OrganizationMembershipDocument = OrganizationMembership & Document;
 
