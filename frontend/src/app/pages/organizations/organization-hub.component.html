@@ -32,8 +32,7 @@
         @for (org of organizations(); track org._id) {
           <div
             (click)="navigateToOrg(org._id)"
-            (keydown.enter)="navigateToOrg(org._id)"
-            (keydown.space)="$event.preventDefault(); navigateToOrg(org._id)"
+            (keydown)="onCardKeydown($event, org._id)"
             tabindex="0"
             role="button"
             class="group relative bg-white dark:bg-zinc-900/50 rounded-2xl p-6 shadow-sm hover:shadow-md border border-slate-200 dark:border-zinc-800 hover:border-poly-300 dark:hover:border-poly-700 focus:outline-none focus:ring-2 focus:ring-poly-500 cursor-pointer transition-all duration-300 overflow-hidden"
@@ -49,7 +48,7 @@
                 <div
                   class="h-12 w-12 bg-gradient-to-br from-poly-500 to-poly-700 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-inner shadow-poly-400/20"
                 >
-                  {{ org.name.charAt(0).toUpperCase() }}
+                  {{ (org.name && org.name.charAt(0)) ? org.name.charAt(0).toUpperCase() : '' }}
                 </div>
 
                 <!-- Title -->

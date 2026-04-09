@@ -77,4 +77,13 @@ export class OrganizationHubComponent implements OnInit {
     localStorage.setItem('active_org_id', orgId);
     this.router.navigate(['/org', orgId, 'drive']);
   }
+
+  onCardKeydown(event: KeyboardEvent, orgId: string): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === ' ') {
+        event.preventDefault();
+      }
+      this.navigateToOrg(orgId);
+    }
+  }
 }
