@@ -32,7 +32,7 @@
         @for (org of organizations(); track org._id) {
           <div
             (click)="navigateToOrg(org._id)"
-            (keyup.enter)="navigateToOrg(org._id)"
+            (keydown.enter)="navigateToOrg(org._id)"
             (keydown.space)="$event.preventDefault(); navigateToOrg(org._id)"
             tabindex="0"
             role="button"
