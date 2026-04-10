@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OrganizationHubComponent } from './organization-hub.component';
 import { OrganizationService } from './organization.service';
+import { OrganizationContextService } from '../../core/services/organization-context.service';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { Organization } from './organization.interface';
@@ -9,8 +10,14 @@ describe('OrganizationHubComponent', () => {
   let component: OrganizationHubComponent;
   let fixture: ComponentFixture<OrganizationHubComponent>;
   let mockOrganizationService: {
-    getOrganizations: ReturnType<typeof vi.fn>;
     createOrganization: ReturnType<typeof vi.fn>;
+  };
+  let mockOrgContextService: {
+    organizations?: ReturnType<typeof vi.fn>;
+    isLoading?: ReturnType<typeof vi.fn>;
+    error?: ReturnType<typeof vi.fn>;
+    loadOrganizations: ReturnType<typeof vi.fn>;
+    setActiveOrganization: ReturnType<typeof vi.fn>;
   };
   let mockRouter: {
     navigate: ReturnType<typeof vi.fn>;
@@ -18,8 +25,17 @@ describe('OrganizationHubComponent', () => {
 
   beforeEach(async () => {
     mockOrganizationService = {
-      getOrganizations: vi.fn().mockReturnValue(of({ data: [] })),
       createOrganization: vi.fn().mockReturnValue(of({ data: { _id: 'new1', name: 'New Org' } })),
+    };
+
+    mockOrgContextService = {
+      organizations: vi.fn().mockReturnValue([]),
+      isLoading: vi.fn().mockReturnValue(false),
+      error: vi.fn().mockReturnValue(null),
+      loadOrganizations: vi.fn(),
+      setActiveOrganization: vi.fn((id: string) => {
+        localStorage.setItem('active_org_id', id);
+      }),
     };
 
     mockRouter = {
@@ -30,6 +46,7 @@ describe('OrganizationHubComponent', () => {
       imports: [OrganizationHubComponent],
       providers: [
         { provide: OrganizationService, useValue: mockOrganizationService },
+        { provide: OrganizationContextService, useValue: mockOrgContextService },
         { provide: Router, useValue: mockRouter },
       ],
     }).compileComponents();
@@ -46,15 +63,9 @@ describe('OrganizationHubComponent', () => {
   });
 
   describe('ngOnInit', () => {
-    it('should load organizations and set isLoading to false', () => {
-      const mockOrgs: Organization[] = [{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }];
-      mockOrganizationService.getOrganizations.mockReturnValue(of({ data: mockOrgs }));
-
+    it('should call loadOrganizations if context is empty and not loading', () => {
       fixture.detectChanges(); // triggers ngOnInit
-
-      expect(mockOrganizationService.getOrganizations).toHaveBeenCalled();
-      expect(component.organizations()).toEqual(mockOrgs);
-      expect(component.isLoading()).toBe(false);
+      expect(mockOrgContextService.loadOrganizations).toHaveBeenCalled();
     });
   });
 
@@ -82,9 +93,11 @@ describe('OrganizationHubComponent', () => {
       expect(mockOrganizationService.createOrganization).not.toHaveBeenCalled();
     });
 
-    it('should call service, update organizations, and close modal on valid submit', () => {
+    it('should call service, trigger context refresh, and close modal on valid submit', () => {
       // Set initial state
-      component.organizations.set([{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }]);
+      if (mockOrgContextService.organizations) {
+        mockOrgContextService.organizations.mockReturnValue([{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }]);
+      }
       component.isModalOpen.set(true);
 
       // Fill form
@@ -94,18 +107,17 @@ describe('OrganizationHubComponent', () => {
       component.onSubmit();
 
       expect(mockOrganizationService.createOrganization).toHaveBeenCalledWith('New Org');
-      // The mock returns an org with _id 'new1'
-      expect(component.organizations().length).toBe(2);
-      expect(component.organizations()[1]._id).toBe('new1');
+      // The mock creates an org, verify context was triggered to refresh
+      expect(mockOrgContextService.loadOrganizations).toHaveBeenCalled();
       expect(component.isModalOpen()).toBe(false);
     });
   });
 
   describe('navigateToOrg', () => {
-    it('should set localStorage and navigate to drive', () => {
+    it('should set active organization in context and navigate to drive', () => {
       component.navigateToOrg('org123');
 
-      expect(localStorage.getItem('active_org_id')).toBe('org123');
+      expect(mockOrgContextService.setActiveOrganization).toHaveBeenCalledWith('org123');
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/org', 'org123', 'drive']);
     });
   });

@@ -19,14 +19,12 @@ export class OrganizationsController {
     @Req() req: AuthenticatedRequest,
   ) {
     const userId = req.user.sub;
-    const role = req.user.role;
-    return this.organizationsService.createOrganization(dto.name, userId, role);
+    return this.organizationsService.createOrganization(dto.name, userId);
   }
 
   @Get()
   async getOrganizations(@Req() req: AuthenticatedRequest) {
     const userId = req.user.sub;
-    const role = req.user.role;
-    return this.organizationsService.getOrganizations(userId, role);
+    return this.organizationsService.getOrganizations(userId);
   }
 }
