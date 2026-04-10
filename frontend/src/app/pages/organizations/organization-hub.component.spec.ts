@@ -65,7 +65,7 @@ describe('OrganizationHubComponent', () => {
   });
 
   describe('ngOnInit', () => {
-    it('should load organizations and set isLoading to false', () => {
+    it('should call loadOrganizations if context is empty and not loading', () => {
       const mockOrgs: Organization[] = [{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }];
       mockOrganizationService.getOrganizations.mockReturnValue(of({ data: mockOrgs }));
 

@@ -176,6 +176,41 @@ describe('OrganizationsService', () => {
       expect(result).toEqual([expectedOrg]);
     });
 
+    it('should call toObject if it is a function on the organization object', async () => {
+      const userId = 'user123';
+
+      const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
+      const mockMongooseOrg = { toObject: () => mockPopulatedOrg };
+      
+      const expectedOrg = {
+        _id: 'org1',
+        name: 'Test Org',
+        tenantAdminId: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+        cloudProviderCount: 0,
+      };
+      
+      const mockMemberships = [
+        {
+          userId,
+          organizationId: mockMongooseOrg,
+          tenantRole: TenantRole.MANAGER,
+        },
+      ];
+
+      const mockExec = jest.fn().mockResolvedValue(mockMemberships);
+      const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
+      membershipModel.find.mockReturnValue({ populate: mockPopulate });
+
+      const result = await service.getOrganizations(userId);
+
+      expect(membershipModel.find).toHaveBeenCalledWith({ userId });
+      expect(mockPopulate).toHaveBeenCalledWith('organizationId');
+      expect(mockExec).toHaveBeenCalled();
+      expect(result).toEqual([expectedOrg]);
+    });
+
     it('should filter out null organizations', async () => {
       const userId = 'user123';
       const now = new Date();

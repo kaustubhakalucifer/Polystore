@@ -61,11 +61,13 @@ export class OrganizationsService {
     // Ensure we handle cases where organizationId might be a populated object or missing.
     const organizations = memberships
       .map((m) => m.organizationId)
-      .filter((org) => org != null)
+      .filter((org) => org != null && typeof org === 'object')
       .map((org) => {
-        const obj = (
-          typeof org.toObject === 'function' ? org.toObject() : org
-        ) as OrganizationDocument & { createdAt?: Date; updatedAt?: Date };
+        const raw = typeof org.toObject === 'function' ? org.toObject() : org;
+        if (!raw || typeof raw !== 'object' || !('_id' in raw)) {
+          return null;
+        }
+        const obj = raw as OrganizationDocument & { createdAt?: Date; updatedAt?: Date };
         return {
           _id: obj._id,
           name: obj.name,
@@ -74,7 +76,8 @@ export class OrganizationsService {
           updatedAt: obj.updatedAt,
           cloudProviderCount: obj.cloudConfigurations?.length || 0,
         };
-      });
+      })
+      .filter((org) => org != null);
 
     return organizations;
   }
