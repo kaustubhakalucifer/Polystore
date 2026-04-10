@@ -63,11 +63,25 @@ export class OrganizationsService {
       .map((m) => m.organizationId)
       .filter((org) => org != null && typeof org === 'object')
       .map((org) => {
-        const raw = typeof org.toObject === 'function' ? org.toObject() : org;
-        if (!raw || typeof raw !== 'object' || !('_id' in raw)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const raw: any =
+          typeof org.toObject === 'function' ? org.toObject() : org;
+        if (
+          !raw ||
+          typeof raw !== 'object' ||
+          !('_id' in raw) ||
+          !('name' in raw) ||
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          typeof raw.name !== 'string' ||
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          (raw.name as string).trim().length === 0
+        ) {
           return null;
         }
-        const obj = raw as OrganizationDocument & { createdAt?: Date; updatedAt?: Date };
+        const obj = raw as OrganizationDocument & {
+          createdAt?: Date;
+          updatedAt?: Date;
+        };
         return {
           _id: obj._id,
           name: obj.name,

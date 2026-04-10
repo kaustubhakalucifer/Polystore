@@ -10,7 +10,6 @@ describe('OrganizationHubComponent', () => {
   let component: OrganizationHubComponent;
   let fixture: ComponentFixture<OrganizationHubComponent>;
   let mockOrganizationService: {
-    getOrganizations: ReturnType<typeof vi.fn>;
     createOrganization: ReturnType<typeof vi.fn>;
   };
   let mockOrgContextService: {
@@ -26,7 +25,6 @@ describe('OrganizationHubComponent', () => {
 
   beforeEach(async () => {
     mockOrganizationService = {
-      getOrganizations: vi.fn().mockReturnValue(of({ data: [] })),
       createOrganization: vi.fn().mockReturnValue(of({ data: { _id: 'new1', name: 'New Org' } })),
     };
 
@@ -66,11 +64,7 @@ describe('OrganizationHubComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call loadOrganizations if context is empty and not loading', () => {
-      const mockOrgs: Organization[] = [{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }];
-      mockOrganizationService.getOrganizations.mockReturnValue(of({ data: mockOrgs }));
-
       fixture.detectChanges(); // triggers ngOnInit
-
       expect(mockOrgContextService.loadOrganizations).toHaveBeenCalled();
     });
   });
@@ -120,10 +114,10 @@ describe('OrganizationHubComponent', () => {
   });
 
   describe('navigateToOrg', () => {
-    it('should set localStorage and navigate to drive', () => {
+    it('should set active organization in context and navigate to drive', () => {
       component.navigateToOrg('org123');
 
-      expect(localStorage.getItem('active_org_id')).toBe('org123');
+      expect(mockOrgContextService.setActiveOrganization).toHaveBeenCalledWith('org123');
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/org', 'org123', 'drive']);
     });
   });

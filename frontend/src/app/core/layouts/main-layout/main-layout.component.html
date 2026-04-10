@@ -57,14 +57,13 @@
           @if (orgDropdownOpen) {
             <div
               id="org-dropdown-panel"
-              role="menu"
               class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
             >
               <div class="py-1">
                 @for (org of orgContext.organizations(); track org._id) {
                   <button
+                    type="button"
                     (click)="switchOrganization(org._id)"
-                    role="menuitem"
                     class="flex items-center w-full px-4 py-2.5 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700"
                     [class.bg-poly-50]="orgContext.activeOrgId() === org._id"
                     [class.dark:bg-poly-900]="orgContext.activeOrgId() === org._id"
@@ -95,7 +94,6 @@
                 <a
                   routerLink="/organizations"
                   (click)="closeOrgDropdown()"
-                  role="menuitem"
                   class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-poly-600 dark:text-poly-400 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-600 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors"
                 >
                   Manage Organizations

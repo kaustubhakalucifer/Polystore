@@ -181,7 +181,7 @@ describe('OrganizationsService', () => {
 
       const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
       const mockMongooseOrg = { toObject: () => mockPopulatedOrg };
-      
+
       const expectedOrg = {
         _id: 'org1',
         name: 'Test Org',
@@ -190,7 +190,7 @@ describe('OrganizationsService', () => {
         updatedAt: undefined,
         cloudProviderCount: 0,
       };
-      
+
       const mockMemberships = [
         {
           userId,
