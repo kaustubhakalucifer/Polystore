@@ -16,12 +16,10 @@ import { DatePipe } from '@angular/common';
 })
 export class OrganizationHubComponent implements OnInit {
   private organizationService = inject(OrganizationService);
-  private orgContextService = inject(OrganizationContextService);
+  public orgContextService = inject(OrganizationContextService);
   private fb = inject(NonNullableFormBuilder);
   private router = inject(Router);
 
-  organizations = signal<Organization[]>([]);
-  isLoading = signal<boolean>(true);
   isModalOpen = signal<boolean>(false);
   isCreating = signal<boolean>(false);
 
@@ -30,18 +28,9 @@ export class OrganizationHubComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Optionally we can also update context organizations here or just let the main layout handle it.
-    // We'll keep local component state for loading for now, but also update the global context.
-    this.organizationService.getOrganizations().subscribe({
-      next: (response) => {
-        this.organizations.set(response.data);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load organizations', err);
-        this.isLoading.set(false);
-      },
-    });
+    if (this.orgContextService.organizations().length === 0 && !this.orgContextService.isLoading()) {
+      this.orgContextService.loadOrganizations();
+    }
   }
 
   openModal(): void {
@@ -67,9 +56,8 @@ export class OrganizationHubComponent implements OnInit {
     this.organizationService.createOrganization(nameTrimmed)
       .pipe(finalize(() => this.isCreating.set(false)))
       .subscribe({
-        next: (response) => {
-          this.organizations.update((orgs) => [...orgs, response.data]);
-          // Refresh context to include new org in topbar
+        next: () => {
+          // Refresh context to include new org in topbar and local view
           this.orgContextService.loadOrganizations();
           this.closeModal();
         },

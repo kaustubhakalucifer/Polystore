@@ -35,6 +35,7 @@
         <div class="relative">
           <button
             (click)="toggleOrgDropdown()"
+            [attr.aria-expanded]="orgDropdownOpen"
             class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-poly-500 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700 transition-colors"
           >
             <span class="truncate max-w-[120px]">

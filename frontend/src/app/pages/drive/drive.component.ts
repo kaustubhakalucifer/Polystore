@@ -1,7 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { OrganizationContextService } from '../../core/services/organization-context.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-drive',
@@ -30,23 +32,32 @@ import { OrganizationContextService } from '../../core/services/organization-con
 export class DriveComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private orgContextService = inject(OrganizationContextService);
+  private destroyRef = inject(DestroyRef);
   
   orgId: string | null = null;
 
   ngOnInit(): void {
-    this.route.parent?.paramMap.subscribe(params => {
-      this.orgId = params.get('orgId');
-      if (this.orgId) {
-        this.orgContextService.setActiveOrganization(this.orgId);
-      }
-    });
-    
-    // Fallback if not found in parent
-    if (!this.orgId) {
-      this.orgId = this.route.snapshot.paramMap.get('orgId');
-      if (this.orgId) {
-        this.orgContextService.setActiveOrganization(this.orgId);
-      }
+    // Initial sync read
+    const snapshotId = this.route.parent?.snapshot.paramMap.get('orgId') || this.route.snapshot.paramMap.get('orgId');
+    if (snapshotId) {
+      this.orgId = snapshotId;
+      this.orgContextService.setActiveOrganization(snapshotId);
+    }
+
+    // Subscribe to param changes
+    if (this.route.parent) {
+      this.route.parent.paramMap
+        .pipe(
+          map(params => params.get('orgId')),
+          distinctUntilChanged(),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe(orgId => {
+          if (orgId && orgId !== this.orgId) {
+            this.orgId = orgId;
+            this.orgContextService.setActiveOrganization(orgId);
+          }
+        });
     }
   }
 }

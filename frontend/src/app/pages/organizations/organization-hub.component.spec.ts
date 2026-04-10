@@ -14,6 +14,8 @@ describe('OrganizationHubComponent', () => {
     createOrganization: ReturnType<typeof vi.fn>;
   };
   let mockOrgContextService: {
+    organizations?: ReturnType<typeof vi.fn>;
+    isLoading?: ReturnType<typeof vi.fn>;
     loadOrganizations: ReturnType<typeof vi.fn>;
     setActiveOrganization: ReturnType<typeof vi.fn>;
   };
@@ -28,6 +30,8 @@ describe('OrganizationHubComponent', () => {
     };
 
     mockOrgContextService = {
+      organizations: vi.fn().mockReturnValue([]),
+      isLoading: vi.fn().mockReturnValue(false),
       loadOrganizations: vi.fn(),
       setActiveOrganization: vi.fn((id: string) => {
         localStorage.setItem('active_org_id', id);
@@ -65,9 +69,7 @@ describe('OrganizationHubComponent', () => {
 
       fixture.detectChanges(); // triggers ngOnInit
 
-      expect(mockOrganizationService.getOrganizations).toHaveBeenCalled();
-      expect(component.organizations()).toEqual(mockOrgs);
-      expect(component.isLoading()).toBe(false);
+      expect(mockOrgContextService.loadOrganizations).toHaveBeenCalled();
     });
   });
 
@@ -95,9 +97,11 @@ describe('OrganizationHubComponent', () => {
       expect(mockOrganizationService.createOrganization).not.toHaveBeenCalled();
     });
 
-    it('should call service, update organizations, and close modal on valid submit', () => {
+    it('should call service, trigger context refresh, and close modal on valid submit', () => {
       // Set initial state
-      component.organizations.set([{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }]);
+      if (mockOrgContextService.organizations) {
+        mockOrgContextService.organizations.mockReturnValue([{ _id: 'org1', name: 'Org 1', createdAt: new Date().toISOString() }]);
+      }
       component.isModalOpen.set(true);
 
       // Fill form
@@ -107,9 +111,8 @@ describe('OrganizationHubComponent', () => {
       component.onSubmit();
 
       expect(mockOrganizationService.createOrganization).toHaveBeenCalledWith('New Org');
-      // The mock returns an org with _id 'new1'
-      expect(component.organizations().length).toBe(2);
-      expect(component.organizations()[1]._id).toBe('new1');
+      // The mock creates an org, verify context was triggered to refresh
+      expect(mockOrgContextService.loadOrganizations).toHaveBeenCalled();
       expect(component.isModalOpen()).toBe(false);
     });
   });

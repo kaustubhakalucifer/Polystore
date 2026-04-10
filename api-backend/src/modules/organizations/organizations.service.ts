@@ -74,7 +74,7 @@ export class OrganizationsService {
       .filter((org) => org != null)
       .map((org) => {
         const obj = (
-          org.toObject ? org.toObject() : org
+          typeof org.toObject === 'function' ? org.toObject() : org
         ) as OrganizationDocument & { createdAt?: Date; updatedAt?: Date };
         return {
           _id: obj._id,

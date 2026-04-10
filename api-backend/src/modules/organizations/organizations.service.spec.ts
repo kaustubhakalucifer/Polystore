@@ -103,7 +103,50 @@ describe('OrganizationsService', () => {
   });
 
   describe('getOrganizations', () => {
-    it('should return organizations mapped from memberships', async () => {
+    it('should return organizations mapped from memberships with all fields mapped', async () => {
+      const userId = 'user123';
+      const role = PlatformRole.TENANT_ADMIN;
+      const now = new Date();
+
+      const mockPopulatedOrg = { 
+        _id: 'org1', 
+        name: 'Test Org',
+        tenantAdminId: 'tenant123',
+        createdAt: now,
+        updatedAt: now,
+        cloudConfigurations: ['config1', 'config2']
+      };
+      
+      const expectedOrg = {
+        _id: 'org1',
+        name: 'Test Org',
+        tenantAdminId: 'tenant123',
+        createdAt: now,
+        updatedAt: now,
+        cloudProviderCount: 2,
+      };
+      
+      const mockMemberships = [
+        {
+          userId,
+          organizationId: mockPopulatedOrg,
+          tenantRole: TenantRole.MANAGER,
+        },
+      ];
+
+      const mockExec = jest.fn().mockResolvedValue(mockMemberships);
+      const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
+      membershipModel.find.mockReturnValue({ populate: mockPopulate });
+
+      const result = await service.getOrganizations(userId, role);
+
+      expect(membershipModel.find).toHaveBeenCalledWith({ userId });
+      expect(mockPopulate).toHaveBeenCalledWith('organizationId');
+      expect(mockExec).toHaveBeenCalled();
+      expect(result).toEqual([expectedOrg]);
+    });
+
+    it('should return organizations mapped from memberships (fallback fields)', async () => {
       const userId = 'user123';
       const role = PlatformRole.TENANT_ADMIN;
 
@@ -139,15 +182,24 @@ describe('OrganizationsService', () => {
     it('should filter out null organizations', async () => {
       const userId = 'user123';
       const role = PlatformRole.TENANT_ADMIN;
+      const now = new Date();
 
-      const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
+      const mockPopulatedOrg = { 
+        _id: 'org1', 
+        name: 'Test Org',
+        tenantAdminId: 'tenant123',
+        createdAt: now,
+        updatedAt: now,
+        cloudConfigurations: ['config1', 'config2']
+      };
+      
       const expectedOrg = {
         _id: 'org1',
         name: 'Test Org',
-        tenantAdminId: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
-        cloudProviderCount: 0,
+        tenantAdminId: 'tenant123',
+        createdAt: now,
+        updatedAt: now,
+        cloudProviderCount: 2,
       };
       const mockMemberships = [
         {

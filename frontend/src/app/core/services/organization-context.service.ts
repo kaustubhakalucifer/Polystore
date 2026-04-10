@@ -10,9 +10,13 @@ export class OrganizationContextService {
   
   private _organizations = signal<Organization[]>([]);
   private _activeOrgId = signal<string | null>(localStorage.getItem('active_org_id'));
+  private _isLoading = signal<boolean>(false);
+  private _error = signal<string | null>(null);
 
   public organizations = computed(() => this._organizations());
   public activeOrgId = computed(() => this._activeOrgId());
+  public isLoading = computed(() => this._isLoading());
+  public error = computed(() => this._error());
   
   public activeOrganization = computed(() => {
     const orgs = this._organizations();
@@ -21,11 +25,18 @@ export class OrganizationContextService {
   });
 
   public loadOrganizations(): void {
+    this._isLoading.set(true);
+    this._error.set(null);
     this.organizationService.getOrganizations().subscribe({
       next: (res) => {
         this._organizations.set(res.data);
+        this._isLoading.set(false);
       },
-      error: (err) => console.error('Failed to load organizations context', err)
+      error: (err) => {
+        console.error('Failed to load organizations context', err);
+        this._error.set('Failed to load organizations');
+        this._isLoading.set(false);
+      }
     });
   }
 
