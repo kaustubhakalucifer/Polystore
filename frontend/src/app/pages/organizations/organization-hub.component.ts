@@ -3,7 +3,6 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { OrganizationService } from './organization.service';
 import { OrganizationContextService } from '../../core/services/organization-context.service';
-import { Organization } from './organization.interface';
 import { finalize } from 'rxjs/operators';
 
 import { DatePipe } from '@angular/common';

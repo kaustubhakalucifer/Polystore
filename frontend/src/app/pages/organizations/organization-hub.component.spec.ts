@@ -16,6 +16,7 @@ describe('OrganizationHubComponent', () => {
   let mockOrgContextService: {
     organizations?: ReturnType<typeof vi.fn>;
     isLoading?: ReturnType<typeof vi.fn>;
+    error?: ReturnType<typeof vi.fn>;
     loadOrganizations: ReturnType<typeof vi.fn>;
     setActiveOrganization: ReturnType<typeof vi.fn>;
   };
@@ -32,6 +33,7 @@ describe('OrganizationHubComponent', () => {
     mockOrgContextService = {
       organizations: vi.fn().mockReturnValue([]),
       isLoading: vi.fn().mockReturnValue(false),
+      error: vi.fn().mockReturnValue(null),
       loadOrganizations: vi.fn(),
       setActiveOrganization: vi.fn((id: string) => {
         localStorage.setItem('active_org_id', id);

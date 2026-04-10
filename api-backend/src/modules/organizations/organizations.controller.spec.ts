@@ -68,7 +68,6 @@ describe('OrganizationsController', () => {
       expect(mockOrganizationsService.createOrganization).toHaveBeenCalledWith(
         'Test Org',
         'user123',
-        PlatformRole.TENANT_ADMIN,
       );
       expect(result).toEqual(expectedResult);
     });
@@ -96,7 +95,6 @@ describe('OrganizationsController', () => {
 
       expect(mockOrganizationsService.getOrganizations).toHaveBeenCalledWith(
         'user123',
-        PlatformRole.TENANT_ADMIN,
       );
       expect(result).toEqual(expectedResult);
     });

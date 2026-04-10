@@ -3,7 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { OrganizationsService } from './organizations.service';
 import { Organization } from './schemas/organization.schema';
 import { OrganizationMembership } from './schemas/organization-membership.schema';
-import { TenantRole, PlatformRole } from '../../core/enums';
+import { TenantRole } from '../../core/enums';
 
 describe('OrganizationsService', () => {
   let service: OrganizationsService;
@@ -82,7 +82,6 @@ describe('OrganizationsService', () => {
     it('should create an organization and a membership', async () => {
       const name = 'Test Org';
       const userId = 'user123';
-      const role = PlatformRole.TENANT_ADMIN;
 
       const mockCreatedOrg = {
         _id: 'org-mock-id',
@@ -94,7 +93,7 @@ describe('OrganizationsService', () => {
       mockOrgSave.mockResolvedValue(mockCreatedOrg);
       mockMembershipSave.mockResolvedValue(true);
 
-      const result = await service.createOrganization(name, userId, role);
+      const result = await service.createOrganization(name, userId);
 
       expect(mockOrgSave).toHaveBeenCalled();
       expect(mockMembershipSave).toHaveBeenCalled();
@@ -105,18 +104,17 @@ describe('OrganizationsService', () => {
   describe('getOrganizations', () => {
     it('should return organizations mapped from memberships with all fields mapped', async () => {
       const userId = 'user123';
-      const role = PlatformRole.TENANT_ADMIN;
       const now = new Date();
 
-      const mockPopulatedOrg = { 
-        _id: 'org1', 
+      const mockPopulatedOrg = {
+        _id: 'org1',
         name: 'Test Org',
         tenantAdminId: 'tenant123',
         createdAt: now,
         updatedAt: now,
-        cloudConfigurations: ['config1', 'config2']
+        cloudConfigurations: ['config1', 'config2'],
       };
-      
+
       const expectedOrg = {
         _id: 'org1',
         name: 'Test Org',
@@ -125,7 +123,7 @@ describe('OrganizationsService', () => {
         updatedAt: now,
         cloudProviderCount: 2,
       };
-      
+
       const mockMemberships = [
         {
           userId,
@@ -138,7 +136,7 @@ describe('OrganizationsService', () => {
       const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
       membershipModel.find.mockReturnValue({ populate: mockPopulate });
 
-      const result = await service.getOrganizations(userId, role);
+      const result = await service.getOrganizations(userId);
 
       expect(membershipModel.find).toHaveBeenCalledWith({ userId });
       expect(mockPopulate).toHaveBeenCalledWith('organizationId');
@@ -148,7 +146,6 @@ describe('OrganizationsService', () => {
 
     it('should return organizations mapped from memberships (fallback fields)', async () => {
       const userId = 'user123';
-      const role = PlatformRole.TENANT_ADMIN;
 
       const mockPopulatedOrg = { _id: 'org1', name: 'Test Org' };
       const expectedOrg = {
@@ -171,7 +168,7 @@ describe('OrganizationsService', () => {
       const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
       membershipModel.find.mockReturnValue({ populate: mockPopulate });
 
-      const result = await service.getOrganizations(userId, role);
+      const result = await service.getOrganizations(userId);
 
       expect(membershipModel.find).toHaveBeenCalledWith({ userId });
       expect(mockPopulate).toHaveBeenCalledWith('organizationId');
@@ -181,18 +178,17 @@ describe('OrganizationsService', () => {
 
     it('should filter out null organizations', async () => {
       const userId = 'user123';
-      const role = PlatformRole.TENANT_ADMIN;
       const now = new Date();
 
-      const mockPopulatedOrg = { 
-        _id: 'org1', 
+      const mockPopulatedOrg = {
+        _id: 'org1',
         name: 'Test Org',
         tenantAdminId: 'tenant123',
         createdAt: now,
         updatedAt: now,
-        cloudConfigurations: ['config1', 'config2']
+        cloudConfigurations: ['config1', 'config2'],
       };
-      
+
       const expectedOrg = {
         _id: 'org1',
         name: 'Test Org',
@@ -214,7 +210,7 @@ describe('OrganizationsService', () => {
       const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
       membershipModel.find.mockReturnValue({ populate: mockPopulate });
 
-      const result = await service.getOrganizations(userId, role);
+      const result = await service.getOrganizations(userId);
 
       expect(result).toHaveLength(1);
       expect(result).toEqual([expectedOrg]);

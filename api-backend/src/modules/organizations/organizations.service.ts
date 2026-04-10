@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -9,7 +9,7 @@ import {
   OrganizationMembership,
   OrganizationMembershipDocument,
 } from './schemas/organization-membership.schema';
-import { TenantRole, PlatformRole } from '../../core/enums';
+import { TenantRole } from '../../core/enums';
 
 @Injectable()
 export class OrganizationsService {
@@ -20,13 +20,7 @@ export class OrganizationsService {
     private membershipModel: Model<OrganizationMembershipDocument>,
   ) {}
 
-  async createOrganization(name: string, userId: string, role: string) {
-    if (role !== (PlatformRole.TENANT_ADMIN as string)) {
-      throw new ForbiddenException(
-        'Only tenant admins can create organizations',
-      );
-    }
-
+  async createOrganization(name: string, userId: string) {
     const session = await this.orgModel.db.startSession();
     session.startTransaction();
 
@@ -57,11 +51,7 @@ export class OrganizationsService {
     }
   }
 
-  async getOrganizations(userId: string, role: string) {
-    if (role !== (PlatformRole.TENANT_ADMIN as string)) {
-      throw new ForbiddenException('Only tenant admins can view organizations');
-    }
-
+  async getOrganizations(userId: string) {
     const memberships = await this.membershipModel
       .find({ userId })
       .populate<{ organizationId: OrganizationDocument }>('organizationId')
